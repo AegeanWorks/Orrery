@@ -27,11 +27,13 @@ class TrailRecorder:
 
     def sync(self, world: World) -> None:
         """Synchronize trail history buffers when the world body count changes."""
-        if len(self._trails) > len(world.bodies):
-            self._trails = self._trails[:len(world.bodies)]
-        elif len(self._trails) < len(world.bodies):
-            for i in range(len(self._trails), len(world.bodies)):
-                self._trails.append(deque([world.bodies[i].pos], maxlen=self._limit))
+        if len(self._trails) != len(world.bodies):
+            # A merge drops one body at an arbitrary index; slicing would keep
+            # the wrong history and draw a spurious line across the scene.
+            # Reseed from the current positions instead.
+            self._trails = [
+                deque([body.pos], maxlen=self._limit) for body in world.bodies
+            ]
 
     def record(self, world: World) -> None:
         if len(world.bodies) != len(self._trails):

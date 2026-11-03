@@ -665,7 +665,10 @@ def _cmd_snapshot(args: argparse.Namespace) -> int:
             f"{scenario.time_unit}.",
             code=2,
         )
-    estimated_steps = math.ceil(args.at / scenario.dt)
+    dt_for_budget = getattr(args, "dt", None)
+    if dt_for_budget is None or not math.isfinite(dt_for_budget) or dt_for_budget <= 0.0:
+        dt_for_budget = scenario.dt
+    estimated_steps = math.ceil(args.at / dt_for_budget)
     if estimated_steps > SNAPSHOT_STEP_LIMIT and not getattr(args, "force", False):
         raise CliError(
             f"--at {args.at:g} needs about {estimated_steps:,} integration steps.",

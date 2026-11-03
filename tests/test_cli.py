@@ -164,6 +164,13 @@ class SnapshotTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertIn("t = 100.00 d", output)
 
+    def test_snapshot_step_budget_uses_effective_dt(self):
+        with mock.patch("orrery.cli.SNAPSHOT_STEP_LIMIT", 10):
+            code, output = run_cli("snapshot", "solar", "--at", "1", "--dt", "0.01",
+                                   "--width", "40", "--height", "12", "--ascii")
+            self.assertEqual(code, 2)
+            self.assertIn("--force", output)
+
     def test_bad_width_is_refused(self):
         code, output = run_cli("snapshot", "solar", "--width", "5")
         self.assertEqual(code, 2)

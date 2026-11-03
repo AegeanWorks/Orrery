@@ -9,8 +9,8 @@
 - **Total Python Modules**: `20`
 - **Total Classes**: `31`
 - **Total Top-Level Functions**: `76`
-- **Total Class Methods**: `215`
-- **Total Source Lines**: `6134`
+- **Total Class Methods**: `217`
+- **Total Source Lines**: `6158`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`orrery/cli.py`](orrery/cli.py)
 > *Command-line surface for Orrery.*
 
-**Size**: `1373` lines (`59422` bytes)
+**Size**: `1376` lines (`59596` bytes)
 
 **Classes:**
 - `class CliError` - *A failure with a cause and a concrete next action.*
@@ -206,7 +206,7 @@
 ### [`orrery/trails.py`](orrery/trails.py)
 > *Bounded, sampled position history for drawing orbit trails.*
 
-**Size**: `121` lines (`5231` bytes)
+**Size**: `123` lines (`5301` bytes)
 
 **Classes:**
 - `class TrailRecorder` - *Keep one bounded deque of past positions per body, sampled every N steps.*
@@ -255,7 +255,7 @@
 ---
 
 ### [`tests/test_cli.py`](tests/test_cli.py)
-**Size**: `565` lines (`26174` bytes)
+**Size**: `572` lines (`26546` bytes)
 
 **Classes:**
 - `class ListAndInfoTests`
@@ -276,6 +276,7 @@
   - Method `.test_aspect_can_be_overridden_and_is_validated()`
   - Method `.test_all_scenarios_are_visible_at_minimum_size()`
   - Method `.test_snapshot_step_budget_can_be_overridden()`
+  - Method `.test_snapshot_step_budget_uses_effective_dt()`
   - Method `.test_bad_width_is_refused()`
   - Method `.test_unknown_scenario_is_a_friendly_error()`
 - `class RunTests`
@@ -460,7 +461,7 @@
 ---
 
 ### [`tests/test_trails.py`](tests/test_trails.py)
-**Size**: `73` lines (`2851` bytes)
+**Size**: `85` lines (`3445` bytes)
 
 **Classes:**
 - `class TrailRecorderTests`
@@ -469,6 +470,7 @@
   - Method `.test_sampling_every_other_step()`
   - Method `.test_advance_to_uses_a_short_final_step()`
   - Method `.test_advance_to_resolves_collisions()`
+  - Method `.test_merge_does_not_mix_distant_body_history()`
   - Method `.test_zero_limit_disables_history()`
   - Method `.test_clear_resets_trail_history()`
   - Method `.test_invalid_arguments_are_rejected()`

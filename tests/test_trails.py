@@ -37,6 +37,18 @@ class TrailRecorderTests(unittest.TestCase):
         self.assertEqual(len(world.bodies), 1)
         self.assertEqual(len(recorder.trails), 1)
 
+    def test_merge_does_not_mix_distant_body_history(self):
+        b1 = Body("A", 10.0, Vec2(0.0, 0.0), Vec2(0.0, 0.0), "A")
+        b2 = Body("B", 1.0, Vec2(0.02, 0.0), Vec2(0.0, 0.0), "B")
+        b3 = Body("C", 10.0, Vec2(5.0, 0.0), Vec2(0.0, 0.0), "C")
+        world = World((b1, b2, b3), 1e-6)
+        recorder = TrailRecorder(world, 10)
+        recorder.advance_to(world, 0.02, 0.01, merge_radius=0.05)
+        self.assertEqual(len(world.bodies), 2)
+        self.assertEqual(len(recorder.trails), 2)
+        for point in recorder.trails[1]:
+            self.assertGreater(point.x, 4.0)
+
     def test_zero_limit_disables_history(self):
         world = self._world()
         recorder = TrailRecorder(world, 0)

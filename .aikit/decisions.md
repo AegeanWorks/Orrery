@@ -185,6 +185,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: No screenshots existed and `media.json` said `has_ui:false/cli` although the browser studio is a documented first-class UI next to the terminal.
 - **Decision**: Correct `media.json` to `has_ui:true/web` and register `2026-11-03-solar.png` (`python -m orrery web solar`) plus `2026-11-03-figure-eight.png` (`python -m orrery web figure-eight`), headless Edge 1440x900, commit `9b2428f`, in `.aikit/media.json` and the README `aegean:screenshots` block. The text CLI stays README-documented; terminal output is not a screenshot subject.
 - **Consequences**: README proves two worlds and the world picker. Reproduce with the two serve commands plus headless `--screenshot` each.
+
+### ADR-013: Snapshot step budget uses the effective --dt
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: `_cmd_snapshot` estimated steps from `scenario.dt` while `_simulate` integrated with the `--dt` override, so `--at 1500 --dt 0.0005` on solar passed the 2,000,000-step guard (7,500 estimated) yet required 3,000,000 real steps.
+- **Decision**: Compute the budget from the effective step (`--dt` when finite and positive, else the scenario default) before the `--force` check; validation order is unchanged.
+- **Consequences**: Small-`--dt` snapshots are refused without `--force` exactly like large-`--at` ones. Reproduce with `SNAPSHOT_STEP_LIMIT=10`: `snapshot solar --at 1 --dt 0.01` exits 2.
+
+### ADR-014: Trail history reseeds when a merge changes the body count
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: `TrailRecorder.sync` truncated to `trails[:len(bodies)]` after a merge, keeping the absorbed body's history and dropping the distant survivor's, then appending the survivor's new position onto the wrong history (e.g. `[(0.02,0),(5.0,0)]`), drawing one spurious line across the scene.
+- **Decision**: On any body-count change, rebuild all trail buffers from the current world positions instead of slicing; sampling limits and the zero-limit disable path are unchanged.
+- **Consequences**: Merges clear old trails rather than mixing histories; no cross-scene streak. Reproduce with the 3-body A+B merge vs distant C test in `test_trails.py`.
 ## Licensing migration (v1.0.0-agpl)
 
 - New versions use Aegean Science License 1.1 (ASL-1.1); versions at or before `v1.0.0-agpl` remain AGPL-3.0.

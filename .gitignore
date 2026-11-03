@@ -17,3 +17,5 @@ venv/
 build/
 dist/
 *.egg-info/
+# AIKit transient state
+.aikit/*.log
