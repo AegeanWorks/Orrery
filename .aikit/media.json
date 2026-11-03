@@ -2,8 +2,8 @@
   "schema": 1,
   "name": "orrery",
   "repo": "Orrery",
-  "has_ui": false,
-  "ui_kind": "cli",
+  "has_ui": true,
+  "ui_kind": "web",
   "palette": [
     "#08110f",
     "#0f2b24",
@@ -42,6 +42,45 @@
       }
     }
   },
-  "screenshots": [],
+  "screenshots": [
+    {
+      "path": "assets/screenshots/2026-11-03-solar.png",
+      "alt": "Orrery solar studio at 2026-11-03",
+      "caption": "Inner Solar System from python -m orrery web solar: five bodies at t 0.40 d, live energy drift, bodies table.",
+      "commit": "9b2428f81191f5f0f0e0702e1ff2e74009ef2bb4",
+      "taken_at": "2026-11-03",
+      "viewport": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "status": "approved",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:kilo",
+        "method": "vision",
+        "notes": "Real headless-Edge capture of the running sim: planets labeled, energy readouts, time controls and bodies table all legible.",
+        "score": 93,
+        "reviewed_at": "2026-11-03"
+      }
+    },
+    {
+      "path": "assets/screenshots/2026-11-03-figure-eight.png",
+      "alt": "Orrery figure-eight at 2026-11-03",
+      "caption": "Figure-Eight Choreography from python -m orrery web figure-eight: three equal masses at t 0.00.",
+      "commit": "9b2428f81191f5f0f0e0702e1ff2e74009ef2bb4",
+      "taken_at": "2026-11-03",
+      "viewport": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "status": "approved",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:kilo",
+        "method": "vision",
+        "notes": "Real capture of the second world: description, energy panel, Alpha/Beta/Gamma rows; proves the world picker.",
+        "score": 91,
+        "reviewed_at": "2026-11-03"
+      }
+    }
+  ],
   "model": "community/scriptsnsenses-sys/flux-2-dev-free"
 }

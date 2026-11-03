@@ -178,6 +178,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   physics flags affect the browser exactly as they affect the terminal, and drag-and-drop
   scenarios remain usable for the server's lifetime. Server requests leave no files behind and
   oversized bodies receive `413` without touching the loader.
+
+### ADR-012: First screenshot keepers are solar plus figure-eight; ui flag corrected
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: No screenshots existed and `media.json` said `has_ui:false/cli` although the browser studio is a documented first-class UI next to the terminal.
+- **Decision**: Correct `media.json` to `has_ui:true/web` and register `2026-11-03-solar.png` (`python -m orrery web solar`) plus `2026-11-03-figure-eight.png` (`python -m orrery web figure-eight`), headless Edge 1440x900, commit `9b2428f`, in `.aikit/media.json` and the README `aegean:screenshots` block. The text CLI stays README-documented; terminal output is not a screenshot subject.
+- **Consequences**: README proves two worlds and the world picker. Reproduce with the two serve commands plus headless `--screenshot` each.
 ## Licensing migration (v1.0.0-agpl)
 
 - New versions use Aegean Science License 1.1 (ASL-1.1); versions at or before `v1.0.0-agpl` remain AGPL-3.0.

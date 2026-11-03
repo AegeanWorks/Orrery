@@ -321,3 +321,13 @@ The integrator, unit policy, rendering boundary, viewport fitting and work caps 
 ## 📜 License
 
 Free for non-commercial research and teaching under the Aegean Science License 1.1 (ASL-1.1); see [LICENSE](LICENSE). It allows publication, reproducibility sharing, text/data mining and non-commercial ML training. Commercial or industry-sponsored use needs the Aegean Commercial License 1.0 (ACL-1.0); see [COMMERCIAL.md](COMMERCIAL.md).
+
+<!-- aegean:screenshots:start -->
+## Screenshots
+
+<a href="https://github.com/AegeanWorks/Orrery/commit/9b2428f"><img src="assets/screenshots/2026-11-03-solar.png" alt="Orrery solar studio at 2026-11-03"></a>
+
+<a href="https://github.com/AegeanWorks/Orrery/commit/9b2428f"><img src="assets/screenshots/2026-11-03-figure-eight.png" alt="Orrery figure-eight at 2026-11-03"></a>
+
+*commit `9b2428f` · 2026-11-03 · viewport 1440x900 · solar plus figure-eight worlds; CLI stays text-documented (ADR-012)*
+<!-- aegean:screenshots:end -->
