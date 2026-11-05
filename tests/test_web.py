@@ -289,6 +289,19 @@ class WebConfigTests(unittest.TestCase):
         self.assertEqual(data.get("options", {}).get("dt"), 0.25)
         self.assertTrue(data.get("options", {}).get("reverse"))
 
+    def test_browser_matches_terminal_relativity_and_trails(self):
+        from orrery.web import HTML_PAGE
+        # Full 1PN parity with sim.py (not the old 3GM/c^2r shortcut).
+        self.assertIn("factorR", HTML_PAGE)
+        self.assertIn("factorV", HTML_PAGE)
+        self.assertIn("4.0 * phi - v2", HTML_PAGE)
+        # Merge reseeds all trails instead of splicing one (ADR-014 parity).
+        self.assertIn("Reseed every trail", HTML_PAGE)
+        self.assertIn("state.trails = state.bodies.map", HTML_PAGE)
+        # Scenario trail_length drives the web trail budget.
+        self.assertIn("data.trail_length", HTML_PAGE)
+        self.assertIn("slider-trail", HTML_PAGE)
+
     def test_oversized_upload_is_refused(self):
         request = urllib.request.Request(
             f"{self.base_url}/api/validate",

@@ -43,6 +43,8 @@ class TrailRecorder:
 
     def clear(self, world: World | None = None) -> None:
         """Clear historical trail samples, seeding with current positions if world is given."""
+        if world is not None and len(world.bodies) != len(self._trails):
+            self.sync(world)
         for index, trail in enumerate(self._trails):
             trail.clear()
             if world is not None and index < len(world.bodies):

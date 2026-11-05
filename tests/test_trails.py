@@ -66,6 +66,21 @@ class TrailRecorderTests(unittest.TestCase):
         recorder.clear()
         self.assertEqual(len(recorder.trails[0]), 0)
 
+    def test_clear_after_external_merge_resyncs(self):
+        b1 = Body("A", 10.0, Vec2(0.0, 0.0), Vec2(0.0, 0.0), "A")
+        b2 = Body("B", 1.0, Vec2(0.02, 0.0), Vec2(0.0, 0.0), "B")
+        b3 = Body("C", 10.0, Vec2(5.0, 0.0), Vec2(0.0, 0.0), "C")
+        world = World((b1, b2, b3), 1e-6)
+        recorder = TrailRecorder(world, 10)
+        # Merge outside the recorder so lengths diverge before clear().
+        world.resolve_collisions(merge_radius=0.05)
+        self.assertEqual(len(world.bodies), 2)
+        recorder.clear(world)
+        self.assertEqual(len(recorder.trails), 2)
+        self.assertEqual(len(recorder.trails[0]), 1)
+        self.assertEqual(len(recorder.trails[1]), 1)
+        self.assertGreater(recorder.trails[1][0].x, 4.0)
+
     def test_invalid_arguments_are_rejected(self):
         world = self._world()
         with self.assertRaises(ValueError):

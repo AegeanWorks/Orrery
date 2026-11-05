@@ -858,6 +858,9 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
         state.time = 0.0;
         state.units = { time: data.time_unit, dist: data.distance_unit, mass: data.mass_unit };
         state.trails = state.bodies.map(() => []);
+        state.maxTrails = data.trail_length || 800;
+        setSliderValue('slider-trail', state.maxTrails);
+        document.getElementById('label-trail').textContent = state.maxTrails.toString();
         state.pan = { x: 0, y: 0 };
         state.zoom = 1.0;
         state.trackingIndex = -1;
@@ -925,6 +928,12 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
       opt.textContent = `${b.name} (${b.symbol})`;
       sel.appendChild(opt);
     });
+    if (state.trackingIndex >= 0 && state.trackingIndex < state.bodies.length) {
+      sel.value = String(state.trackingIndex);
+    } else {
+      state.trackingIndex = -1;
+      sel.value = "-1";
+    }
   }
 
   // Physics Integration: Symplectic Kick-Drift-Kick Leapfrog
@@ -946,14 +955,27 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
         if (r2 <= 1e-12) continue;
         const r = Math.sqrt(r2);
         const inv_r3 = 1.0 / (r2 * r);
-        let pull = g * inv_r3;
+        const pull = g * inv_r3;
+        let corrX = dx;
+        let corrY = dy;
         if (c !== null && c > 0.0) {
-          pull *= (1.0 + (3.0 * g * (b1.mass + b2.mass)) / (c * c * r));
+          // Full 1PN correction matching sim.py: position term (4*phi - v^2)/c^2
+          // plus velocity term 4*(r.v)/c^2, applied symmetrically to both bodies.
+          const dvx = b1.vx - b2.vx;
+          const dvy = b1.vy - b2.vy;
+          const v2 = dvx * dvx + dvy * dvy;
+          const rv = dx * dvx + dy * dvy;
+          const phi = g * (b1.mass + b2.mass) / r;
+          const c2 = c * c;
+          const factorR = (4.0 * phi - v2) / c2;
+          const factorV = 4.0 * rv / c2;
+          corrX = dx * (1.0 + factorR) - dvx * factorV;
+          corrY = dy * (1.0 + factorR) - dvy * factorV;
         }
-        ax[i] += pull * b2.mass * dx;
-        ay[i] += pull * b2.mass * dy;
-        ax[j] -= pull * b1.mass * dx;
-        ay[j] -= pull * b1.mass * dy;
+        ax[i] += pull * b2.mass * corrX;
+        ay[i] += pull * b2.mass * corrY;
+        ax[j] -= pull * b1.mass * corrX;
+        ay[j] -= pull * b1.mass * corrY;
 
         if (k_e !== 0.0 && (b1.charge !== 0.0 || b2.charge !== 0.0)) {
           const coulomb = k_e * (b1.charge * b2.charge) * inv_r3;
@@ -1005,6 +1027,7 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
       }
     } else if (mode === "merge") {
       const rad = state.mergeRadius;
+      const before = state.bodies.length;
       let i = 0;
       while (i < state.bodies.length) {
         let j = i + 1;
@@ -1028,6 +1051,14 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
           }
         }
         if (!merged) i++;
+      }
+      if (state.bodies.length !== before) {
+        // A merge drops one body at an arbitrary index; splicing keeps the
+        // wrong history and draws a spurious line across the scene.
+        // Reseed every trail from the current positions (mirrors ADR-014).
+        state.trails = state.bodies.map(b => [{ x: b.x, y: b.y }]);
+        if (state.trackingIndex >= state.bodies.length) state.trackingIndex = -1;
+        updateTrackingSelect();
       }
     }
   }

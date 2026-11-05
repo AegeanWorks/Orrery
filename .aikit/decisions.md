@@ -199,6 +199,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: `TrailRecorder.sync` truncated to `trails[:len(bodies)]` after a merge, keeping the absorbed body's history and dropping the distant survivor's, then appending the survivor's new position onto the wrong history (e.g. `[(0.02,0),(5.0,0)]`), drawing one spurious line across the scene.
 - **Decision**: On any body-count change, rebuild all trail buffers from the current world positions instead of slicing; sampling limits and the zero-limit disable path are unchanged.
 - **Consequences**: Merges clear old trails rather than mixing histories; no cross-scene streak. Reproduce with the 3-body A+B merge vs distant C test in `test_trails.py`.
+
+### ADR-015: Browser integrator matches the terminal 1PN, merge trails and trail budget
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: The browser used the `1+3GM/c^2r` shortcut while `sim.py` uses the full velocity-dependent 1PN term, so relativity runs diverged; its merge spliced one trail (the ADR-014 bug) and it ignored `scenario.trail_length`, truncating e.g. pythagorean (10000) to the 800 default.
+- **Decision**: Port the full `factorR/factorV` correction to `web.py`, reseed all browser trails plus rebuild the tracking picker on any merge, apply `data.trail_length` to `state.maxTrails`/slider on load, and resync `TrailRecorder.clear(world)` when the world changed outside the recorder.
+- **Consequences**: Same initial conditions give the same 1PN track in both UIs; merges clear trails in both; each world shows its designed trail budget. Reproduce with `test_browser_matches_terminal_relativity_and_trails` plus `test_clear_after_external_merge_resyncs`.
 ## Licensing migration (v1.0.0-agpl)
 
 - New versions use Aegean Science License 1.1 (ASL-1.1); versions at or before `v1.0.0-agpl` remain AGPL-3.0.
