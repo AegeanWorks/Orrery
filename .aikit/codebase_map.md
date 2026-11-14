@@ -1,7 +1,7 @@
 # Codebase Map & Symbol Catalog 🗺️
 
 > **AUTO-GENERATED & VERIFIED BY `scripts/update_knowledge_base.py`**
-> This document provides an automated, up-to-date registry of all modules, classes, and exported functions across this repository.
+> This document catalogues Python modules, classes, and exported functions. See Map Coverage for any stack it does not index.
 
 ---
 
@@ -9,8 +9,12 @@
 - **Total Python Modules**: `20`
 - **Total Classes**: `31`
 - **Total Top-Level Functions**: `76`
-- **Total Class Methods**: `217`
-- **Total Source Lines**: `6158`
+- **Total Class Methods**: `219`
+- **Total Source Lines**: `6219`
+
+## 🧭 Map Coverage
+- **Indexed**: python (`20` module(s))
+- **Not indexed by this map**: none (no non-Python source files were found)
 
 ---
 
@@ -206,7 +210,7 @@
 ### [`orrery/trails.py`](orrery/trails.py)
 > *Bounded, sampled position history for drawing orbit trails.*
 
-**Size**: `123` lines (`5301` bytes)
+**Size**: `125` lines (`5403` bytes)
 
 **Classes:**
 - `class TrailRecorder` - *Keep one bounded deque of past positions per body, sampled every N steps.*
@@ -223,7 +227,7 @@
 ### [`orrery/web.py`](orrery/web.py)
 > *Zero-dependency HTTP server and embedded interactive Web-based UI for Orrery.*
 
-**Size**: `1377` lines (`49219` bytes)
+**Size**: `1408` lines (`50712` bytes)
 
 **Classes:**
 - `class WebOptions` - *Physics and time overrides shared by the browser and the terminal.*
@@ -461,7 +465,7 @@
 ---
 
 ### [`tests/test_trails.py`](tests/test_trails.py)
-**Size**: `85` lines (`3445` bytes)
+**Size**: `100` lines (`4199` bytes)
 
 **Classes:**
 - `class TrailRecorderTests`
@@ -473,12 +477,13 @@
   - Method `.test_merge_does_not_mix_distant_body_history()`
   - Method `.test_zero_limit_disables_history()`
   - Method `.test_clear_resets_trail_history()`
+  - Method `.test_clear_after_external_merge_resyncs()`
   - Method `.test_invalid_arguments_are_rejected()`
 
 ---
 
 ### [`tests/test_web.py`](tests/test_web.py)
-**Size**: `310` lines (`12226` bytes)
+**Size**: `323` lines (`12909` bytes)
 
 **Classes:**
 - `class WebApiTests`
@@ -506,6 +511,7 @@
   - Method `.test_custom_scenario_cannot_shadow_a_builtin_key()`
   - Method `.test_json_safe_replaces_non_finite_floats()`
   - Method `.test_run_server_wires_initial_scenario_and_options()`
+  - Method `.test_browser_matches_terminal_relativity_and_trails()`
   - Method `.test_oversized_upload_is_refused()`
 
 ---
