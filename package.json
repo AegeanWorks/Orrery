@@ -1,0 +1,7 @@
+{
+  "name": "orrery-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sealed browser build of the Orrery N-body studio: a dependency-free JavaScript port of the Python leapfrog engine, parity-tested against orrery/sim.py.",
+  "license": "LicenseRef-ASL-1.1"
+}

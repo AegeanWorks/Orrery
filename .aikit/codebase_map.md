@@ -6,15 +6,17 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `20`
-- **Total Classes**: `31`
-- **Total Top-Level Functions**: `76`
-- **Total Class Methods**: `221`
-- **Total Source Lines**: `6261`
+- **Total Python Modules**: `22`
+- **Total Classes**: `32`
+- **Total Top-Level Functions**: `86`
+- **Total Class Methods**: `223`
+- **Total Source Lines**: `6562`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`20` module(s))
-- **Not indexed by this map**: none (no non-Python source files were found)
+- **Indexed**: python (`22` module(s))
+- **Not indexed by this map**: javascript (`2` file(s))
+
+> Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
 ---
 
@@ -393,6 +395,25 @@
 
 ---
 
+### [`tests/test_live_parity.py`](tests/test_live_parity.py)
+> *Parity between the sealed browser build and the Python engine.*
+
+**Size**: `186` lines (`6058` bytes)
+
+**Classes:**
+- `class LiveParityTests`
+  - Method `.test_browser_core_matches_the_python_engine()`
+  - Method `.test_studio_boots_and_drives_against_a_dom_stub()`
+
+**Functions:**
+- `def _body_entry(body)`
+- `def _scenario_case(key)`
+- `def _document(cases)`
+- `def build_cases()`
+- `def _body_entry_batch(bodies)`
+
+---
+
 ### [`tests/test_render.py`](tests/test_render.py)
 **Size**: `122` lines (`5680` bytes)
 
@@ -515,5 +536,19 @@
   - Method `.test_run_server_wires_initial_scenario_and_options()`
   - Method `.test_browser_matches_terminal_relativity_and_trails()`
   - Method `.test_oversized_upload_is_refused()`
+
+---
+
+### [`tools/dump_scenarios.py`](tools/dump_scenarios.py)
+> *Dump the nine built-in scenarios as JSON for the sealed browser build.*
+
+**Size**: `115` lines (`4119` bytes)
+
+**Functions:**
+- `def _float(value)` - *A round-trippable JSON/JS number literal for a finite float.*
+- `def scenario_payload(scenario)`
+- `def build_document()`
+- `def render()`
+- `def main()`
 
 ---

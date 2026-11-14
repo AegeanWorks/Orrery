@@ -310,6 +310,14 @@ print(world.angular_momentum())
 Custom files use `orrery.custom.load_scenario_file` and return the same `Scenario` type. Inline
 types ship with the package (`py.typed`).
 
+## 🌐 Run in the Browser
+
+The sealed static build lives at `index.html` — open it directly from disk, no server needed. It
+embeds the same physics engine as the terminal UI: `src/orrery.js` is a bit-exact JS port of
+`orrery/sim.py` (replayed and verified by `tests/test_live_parity.py`), and `data/scenarios.js`
+holds the nine worlds dumped by `python tools/dump_scenarios.py` from the real Python scenario
+code. If a scenario ever changes, rerun that dumper (`--check` fails on a stale dump).
+
 ## 📚 Design Notes
 
 The integrator, unit policy, rendering boundary, viewport fitting and work caps are recorded in

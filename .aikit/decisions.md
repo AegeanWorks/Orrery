@@ -206,6 +206,24 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Context**: The browser used the `1+3GM/c^2r` shortcut while `sim.py` uses the full velocity-dependent 1PN term, so relativity runs diverged; its merge spliced one trail (the ADR-014 bug) and it ignored `scenario.trail_length`, truncating e.g. pythagorean (10000) to the 800 default.
 - **Decision**: Port the full `factorR/factorV` correction to `web.py`, reseed all browser trails plus rebuild the tracking picker on any merge, apply `data.trail_length` to `state.maxTrails`/slider on load, and resync `TrailRecorder.clear(world)` when the world changed outside the recorder.
 - **Consequences**: Same initial conditions give the same 1PN track in both UIs; merges clear trails in both; each world shows its designed trail budget. Reproduce with `test_browser_matches_terminal_relativity_and_trails` plus `test_clear_after_external_merge_resyncs`.
+### ADR-016: The live site build is a bit-exact JS port with Python-dumped initial conditions
+- **Date**: 2026-11-14
+- **Status**: Accepted
+- **Context**: The AegeanWorks Live page only hosts fully sealed static builds (no server, no
+  `fetch`), but the browser studio (`python -m orrery web`) resolves initial conditions and
+  physics server-side through `orrery/scenarios.py` and `orrery/sim.py`.
+- **Decision**: Ship a parallel sealed build: `src/orrery.js` reimplements `sim.py` exactly
+  (Neumaier summation, identical acceleration ordering, 1PN term, merge/bounce rules) exporting
+  `globalThis.ORRERY_CORE`, with the studio booting only when `document` exists so Node tests can
+  load it. `tools/dump_scenarios.py` freezes all nine scenario initial conditions into
+  `data/scenarios.js` by calling the real Python code (numbers stored as decimal strings);
+  `--check` fails on a stale dump. Parity is gated by `tests/test_live_parity.py` (1e-9 stable,
+  1e-4 chaotic tolerances over scaled error) and `tests/live_parity.cjs`; `index.html` links only
+  local files. The `web` server mode stays for interactive use and screenshot capture.
+- **Consequences**: The Live page can embed Orrery at parity with the terminal engine; scenario
+  edits require regenerating the dump (a stale one fails the check and parity tests). A
+  divergence between `sim.py` and `orrery.js` remains possible and is caught only by the parity
+  suite.
 ## Licensing migration (v1.0.0-agpl)
 
 - New versions use Aegean Science License 1.1 (ASL-1.1); versions at or before `v1.0.0-agpl` remain AGPL-3.0.
