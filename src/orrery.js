@@ -1010,7 +1010,13 @@ function bootStudio(document_) {
     // Mirror the studio state into the query string so a refresh or a copied
     // link restores the same world and physics that the user negotiated.
     const op = new URLSearchParams(globalThis.location.search);
-    op.set("world", state.scenario.key);
+    if (scenarios.some((scenario) => scenario.key === state.scenario.key)) {
+      op.set("world", state.scenario.key);
+    } else {
+      // A custom upload cannot be restored after a reload; linking only the
+      // physics keeps every produced link loadable.
+      op.delete("world");
+    }
     op.set("dt", String(state.dt));
     op.set("rate", String(state.timeWarp));
     if (state.timeDirection < 0) {
@@ -1031,7 +1037,15 @@ function bootStudio(document_) {
       op.delete("ke");
     }
     op.set("collision", state.collisionMode);
-    history_.replaceState(null, "", "?" + op.toString());
+    const query = "?" + op.toString();
+    history_.replaceState(null, "", query);
+    // When embedded in the AegeanWorks play page, report the synced query so
+    // the wrapper can mirror it into the address bar its users can copy.
+    const parent_ = globalThis.parent;
+    if (parent_ && parent_ !== globalThis && typeof parent_.postMessage === "function") {
+      const targetOrigin = globalThis.location && globalThis.location.origin;
+      parent_.postMessage({ liveState: query }, typeof targetOrigin === "string" ? targetOrigin : "*");
+    }
   }
 
   function updateTrackingSelect() {

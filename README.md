@@ -315,6 +315,10 @@ They re-apply on every world switch, exactly like the served studio's `applyWebO
 The studio also mirrors its state back into the query string (`history.replaceState`), so
 after any world switch, warp bump, reverse toggle or physics change the address bar always
 holds a link that restores the current view; copying it shares the exact configuration.
+Embedded wrappers (the AegeanWorks play page) receive the synced query through a
+same-origin `postMessage`, so the wrapper's own address bar mirrors the live state as well.
+Custom uploaded scenarios deliberately leave the URL without `world=`, because such keys
+cannot be restored after a reload.
 Inside the page, Space toggles play/pause and R resets the world; the keys are ignored
 while a slider or selector holds focus.
 

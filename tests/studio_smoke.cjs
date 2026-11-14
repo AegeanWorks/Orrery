@@ -391,6 +391,46 @@ elements["btn-reverse"].dispatch("click");
 if (!lastUrl || lastUrl.indexOf("reverse=1") !== -1) {
   fail(`url write-back: toggling forward must drop reverse from the URL (${lastUrl})`);
 }
+
+// When embedded (e.g. the AegeanWorks play page), the frame reports its
+// synced query to the parent window so the wrapper's address bar can mirror it.
+const parentCaptured = [];
+globalThis.parent = {
+  postMessage(message, origin) {
+    parentCaptured.push({ message, origin });
+  },
+};
+elements["btn-warp-up"].dispatch("click");
+if (!parentCaptured.length
+    || String(parentCaptured[parentCaptured.length - 1].message.liveState || "").indexOf("rate=9") === -1) {
+  fail(`url mirror: the frame never posted its state (${parentCaptured.length})`);
+}
+
+// A custom upload cannot come back from a reload, so the synced URL must
+// not carry its key as world=... (a dead deep link).
+globalThis.FileReader = class {
+  readAsText() {
+    this.onload({ target: { result: JSON.stringify({
+      key: "duo",
+      g: 1.0,
+      dt: 0.005,
+      span: 4.0,
+      extent: [2.5, 2.5],
+      bodies: [
+        { name: "Heavy", mass: 1.0, position: [-0.5, 0.0], velocity: [0.05, 0.0], symbol: "H", color: "orange" },
+        { name: "Light", mass: 1.0, position: [0.5, 0.0], velocity: [-0.05, 0.0], symbol: "L", color: "cyan" },
+      ],
+    }) } });
+  }
+};
+elements["file-input"].dispatch("change", { target: { files: [{}] } });
+if (lastUrl === null || lastUrl.indexOf("world=") !== -1) {
+  fail(`url mirror: the custom world leaked a dead deep-link key (${lastUrl})`);
+}
+if (parentCaptured.length
+    && parentCaptured[parentCaptured.length - 1].message.liveState !== lastUrl) {
+  fail(`url mirror: the posted state diverges from the synced URL (${parentCaptured[parentCaptured.length - 1].message.liveState} vs ${lastUrl})`);
+}
 if (elements["select-collision"].value !== "merge") {
   fail(`url options: the collision override did not apply (${elements["select-collision"].value})`);
 }
