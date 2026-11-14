@@ -508,6 +508,274 @@ function loadScenarios(raw) {
   return raw.scenarios.map(scenarioFromDocument);
 }
 
+/* Custom scenario validation, mirroring orrery/custom.py so the sealed build
+ * accepts exactly the files the server-side loader accepts, with the same
+ * Error/Why/Fix messages and the same defaults. */
+const MAX_SCENARIO_BYTES = 1048576;
+const MAX_BODIES = 64;
+const SCENARIO_COLORS = [
+  "blue", "cyan", "gold", "gray", "green", "magenta", "orange", "red", "white", "yellow",
+];
+
+function scenarioError(message, why, fix) {
+  return {
+    message,
+    why: why || "a custom scenario must be a finite, self-contained JSON description.",
+    fix: fix || (
+      "see the Custom Scenarios section in README.md, or start from " +
+      "examples/custom-two-body.json in the repository."
+    ),
+  };
+}
+
+function fail(message, why, fix) {
+  throw scenarioError(message, why, fix);
+}
+
+function requireNumber(raw, field, positive = false) {
+  if (typeof raw === "boolean" || typeof raw !== "number" || !Number.isFinite(raw)) {
+    fail(`${field} must be a number.`, `${field} was missing or had the wrong type.`);
+  }
+  if (positive && raw <= 0.0) {
+    fail(`${field} must be greater than zero.`);
+  }
+  return raw;
+}
+
+function requireInteger(raw, field, minimum, maximum) {
+  if (typeof raw === "boolean" || !Number.isInteger(raw)) {
+    fail(`${field} must be an integer.`, `${field} was missing or had the wrong type.`);
+  }
+  if (raw < minimum || raw > maximum) {
+    fail(`${field} must be between ${minimum} and ${maximum}.`);
+  }
+  return raw;
+}
+
+function requireString(raw, field, maximum) {
+  if (typeof raw !== "string" || raw.trim().length === 0) {
+    fail(`${field} must be a non-empty string.`, `${field} was missing or empty.`);
+  }
+  if (raw.length > maximum) {
+    fail(`${field} is longer than ${maximum} characters.`);
+  }
+  for (const char of raw) {
+    const code = char.charCodeAt(0);
+    if (code < 32 || code === 127) {
+      fail(
+        `${field} must not contain control characters.`,
+        "names, titles and units are rendered directly in the terminal.",
+      );
+    }
+  }
+  return raw;
+}
+
+function requireVector(raw, field) {
+  if (!Array.isArray(raw) || raw.length !== 2) {
+    fail(`${field} must be a two-number array.`, `${field} should look like [x, y].`);
+  }
+  return [
+    requireNumber(raw[0], `${field}[0]`),
+    requireNumber(raw[1], `${field}[1]`),
+  ];
+}
+
+function requiredBody(raw, index) {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    fail(`bodies[${index}] must be an object.`);
+  }
+  const name = requireString(raw.name, `bodies[${index}].name`, 80);
+  const mass = requireNumber(raw.mass, `bodies[${index}].mass`, true);
+  const position = requireVector(raw.position, `bodies[${index}].position`);
+  const velocity = requireVector(raw.velocity, `bodies[${index}].velocity`);
+  const symbol = requireString(raw.symbol, `bodies[${index}].symbol`, 1);
+  if (symbol.length !== 1 || !/[\x21-\x7e]/.test(symbol)) {
+    fail(
+      `bodies[${index}].symbol must be one printable, non-space ASCII character.`,
+      "the renderer places one character per body.",
+      "use a single letter or digit such as E or 4.",
+    );
+  }
+  const color = raw.color === undefined ? "white" : raw.color;
+  if (typeof color !== "string" || !SCENARIO_COLORS.includes(color)) {
+    fail(
+      `bodies[${index}].color is not a known colour.`,
+      "the palette is fixed so colour output stays portable.",
+      `use one of: ${SCENARIO_COLORS.join(", ")}.`,
+    );
+  }
+  const charge = raw.charge === undefined ? 0.0 : requireNumber(raw.charge, `bodies[${index}].charge`);
+  return { name, mass, position, velocity, symbol, color, charge };
+}
+
+function requiredUnits(raw) {
+  if (raw === undefined || raw === null) {
+    return { time: "t", distance: "u", mass: "m", speed: "u/t", speed_scale: 1.0 };
+  }
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    fail("units must be an object.");
+  }
+  return {
+    time: raw.time === undefined ? "t" : requireString(raw.time, "units.time", 16),
+    distance: raw.distance === undefined ? "u" : requireString(raw.distance, "units.distance", 16),
+    mass: raw.mass === undefined ? "m" : requireString(raw.mass, "units.mass", 16),
+    speed: raw.speed === undefined ? "u/t" : requireString(raw.speed, "units.speed", 16),
+    speed_scale: raw.speed_scale === undefined
+      ? 1.0
+      : requireNumber(raw.speed_scale, "units.speed_scale", true),
+  };
+}
+
+/**
+ * Validate one custom scenario JSON document exactly like the server loader.
+ * `text` is the raw file content; returns { valid: true, entry } with a
+ * studio-ready scenario entry, or { valid: false, error } with the full
+ * Error/Why/Fix text. `MAX_FILE_BYTES` requests mirror orrery/custom.py.
+ */
+function validateScenarioDocument(text) {
+  let size = 0;
+  try {
+    size = new globalThis.TextEncoder().encode(text).length;
+  } catch (error) {
+    size = text.length;
+  }
+  if (size > MAX_SCENARIO_BYTES) {
+    const detail = scenarioError(
+      `the uploaded scenario is larger than ${MAX_SCENARIO_BYTES.toLocaleString("en-US")} bytes.`,
+      "a scenario description should contain only a small amount of data.",
+    );
+    return { valid: false, error: `${detail.message}\nWhy: ${detail.why}\nFix: ${detail.fix}` };
+  }
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    const detail = scenarioError("the uploaded scenario is not valid JSON.", "the file did not parse as JSON.");
+    return { valid: false, error: `${detail.message}\nWhy: ${detail.why}\nFix: ${detail.fix}` };
+  }
+  try {
+    if (data === null || typeof data !== "object" || Array.isArray(data)) {
+      fail("the top-level JSON value must be an object.");
+    }
+    const g = requireNumber(data.g, "g", true);
+    const dt = requireNumber(data.dt, "dt", true);
+    const span = requireNumber(data.span, "span", true);
+    if (!Array.isArray(data.extent) || data.extent.length !== 2) {
+      fail("extent must be a two-number array.", "extent should look like [half_x, half_y].");
+    }
+    const extent = [
+      requireNumber(data.extent[0], "extent[0]", true),
+      requireNumber(data.extent[1], "extent[1]", true),
+    ];
+    if (!Array.isArray(data.bodies) || data.bodies.length < 1 || data.bodies.length > MAX_BODIES) {
+      fail(
+        `bodies must be an array with 1-${MAX_BODIES} entries.`,
+        "the O(N^2) gravity loop and the terminal need a bounded body count.",
+      );
+    }
+    const bodies = data.bodies.map(requiredBody);
+    const names = bodies.map((body) => body.name);
+    if (new Set(names).size !== names.length) {
+      fail("body names must be unique.");
+    }
+    const symbols = bodies.map((body) => body.symbol);
+    if (new Set(symbols).size !== symbols.length) {
+      fail("body symbols must be unique.", "the legend and frame need one symbol per body.");
+    }
+    const key = data.key === undefined ? "custom" : requireString(data.key, "key", 64);
+    const title = data.title === undefined ? key : requireString(data.title, "title", 200);
+    const description = data.description === undefined
+      ? "Custom scenario uploaded in the browser."
+      : requireString(data.description, "description", 2000);
+    const units = requiredUnits(data.units);
+    const stepsPerFrame = data.steps_per_frame === undefined
+      ? 1
+      : requireInteger(data.steps_per_frame, "steps_per_frame", 1, 100000);
+    const trailLength = data.trail_length === undefined
+      ? 1000
+      : requireInteger(data.trail_length, "trail_length", 1, 200000);
+    const recordEvery = data.record_every === undefined
+      ? 1
+      : requireInteger(data.record_every, "record_every", 1, 100000);
+    const defaultFrames = data.default_frames === undefined
+      ? 120
+      : requireInteger(data.default_frames, "default_frames", 1, 1000000);
+    const c = ("c" in data) && data.c !== null ? requireNumber(data.c, "c", true) : null;
+    const k_e = data.k_e === undefined ? 0.0 : requireNumber(data.k_e, "k_e");
+    if (k_e < 0.0) {
+      fail("k_e must be a non-negative number.");
+    }
+    for (const body of bodies) {
+      if (Math.abs(body.position[0]) > extent[0] || Math.abs(body.position[1]) > extent[1]) {
+        fail(
+          `the scenario is inconsistent: scenario '${key}' body '${body.name}' lies outside its extent`,
+          "one of the ranges, symbols or extents does not agree with the bodies.",
+        );
+      }
+    }
+    const entry = scenarioFromDocument({
+      key,
+      title,
+      description,
+      g,
+      dt,
+      span,
+      extent,
+      steps_per_frame: stepsPerFrame,
+      trail_length: trailLength,
+      record_every: recordEvery,
+      default_frames: defaultFrames,
+      time_unit: units.time,
+      distance_unit: units.distance,
+      mass_unit: units.mass,
+      speed_unit: units.speed,
+      speed_scale: units.speed_scale,
+      c,
+      k_e,
+      bodies: bodies.map((body) => ({
+        name: body.name,
+        mass: body.mass,
+        x: body.position[0],
+        y: body.position[1],
+        vx: body.velocity[0],
+        vy: body.velocity[1],
+        symbol: body.symbol,
+        color: body.color,
+        charge: body.charge,
+      })),
+    });
+    return { valid: true, key: entry.key, title: entry.title, bodies: entry.bodies.length, entry };
+  } catch (error) {
+    const detail = error && error.why !== undefined
+      ? error
+      : scenarioError(String(error && error.message ? error.message : error));
+    return { valid: false, error: `${detail.message}\nWhy: ${detail.why}\nFix: ${detail.fix}` };
+  }
+}
+
+/** Catalogue rows for the world selector, mirroring web.py's /api/scenarios. */
+function scenarioCatalogue(scenarios) {
+  return scenarios.map((scenario) => ({
+    key: scenario.key,
+    title: scenario.title,
+    description: scenario.description,
+    bodies: scenario.bodies.length,
+    span: `${gFormat(scenario.span)} ${scenario.distanceUnit}`,
+    c: scenario.c,
+    k_e: scenario.k_e,
+  }));
+}
+
+function gFormat(value) {
+  const rounded = Number(value.toPrecision(12));
+  if (Number.isInteger(rounded)) {
+    return String(rounded);
+  }
+  const text = String(rounded);
+  return text.includes("e") ? text : String(parseFloat(text));
+}
+
 /* ------------------------------------------------------------------ */
 /* Public core surface                                                 */
 /* ------------------------------------------------------------------ */
@@ -520,11 +788,30 @@ globalThis.ORRERY_CORE = {
   orbitalElements,
   scenarioFromDocument,
   loadScenarios,
+  validateScenarioDocument,
+  scenarioCatalogue,
 };
 
 /* ------------------------------------------------------------------ */
-/* Studio: only boots inside a document                                */
+/* Studio: the full Web Studio UI on the parity engine                 */
 /* ------------------------------------------------------------------ */
+
+/* Orrery studio: the full Web Studio UI from orrery/web.py, driven by the
+ * sealed ORRERY_CORE engine so the browser world reproduces the Python
+ * trajectories statement for statement. Boots only inside a document. */
+
+const COLOR_PALETTE = {
+  yellow: "#ffd700",
+  red: "#ff3366",
+  blue: "#00e5ff",
+  cyan: "#00ffff",
+  magenta: "#e040fb",
+  gold: "#ffb300",
+  green: "#00e676",
+  orange: "#ff8700",
+  gray: "#a0aab8",
+  white: "#f5f7fa",
+};
 
 if (typeof document !== "undefined") {
   bootStudio(document);
@@ -532,289 +819,537 @@ if (typeof document !== "undefined") {
 
 function bootStudio(document_) {
   const scenarios = loadScenarios(globalThis.ORRERY_SCENARIOS);
-  const canvas = document_.getElementById("stage");
+  const canvas = document_.getElementById("orrery-canvas");
   const context = canvas.getContext("2d");
+  const energyCanvas = document_.getElementById("energy-chart");
+  const energyContext = energyCanvas.getContext("2d");
 
-  const elements = {
-    scenario: document_.getElementById("scenario"),
-    play: document_.getElementById("play"),
-    step: document_.getElementById("step"),
-    reset: document_.getElementById("reset"),
-    speed: document_.getElementById("speed"),
-    speedLabel: document_.getElementById("speed-label"),
-    relativity: document_.getElementById("relativity"),
-    cLight: document_.getElementById("c-light"),
-    kCoulomb: document_.getElementById("k-coulomb"),
-    merge: document_.getElementById("merge"),
-    mergeRadius: document_.getElementById("merge-radius"),
-    bounce: document_.getElementById("bounce"),
-    bounceRadius: document_.getElementById("bounce-radius"),
-    restitution: document_.getElementById("restitution"),
-    telemetry: document_.getElementById("telemetry"),
-    units: document_.getElementById("units"),
-    description: document_.getElementById("description"),
-    events: document_.getElementById("events"),
-    trails: document_.getElementById("trails"),
-    trailLength: document_.getElementById("trail-length"),
-  };
+  const el = {};
+  for (const id of [
+    "scenario-select", "btn-play", "btn-step-back", "btn-step-fwd", "btn-reverse",
+    "btn-warp-down", "btn-warp-up", "warp-label", "btn-reset", "btn-toggle-hud",
+    "hud-panel", "btn-upload", "file-input", "scenario-desc", "units-badge",
+    "slider-dt", "label-dt", "check-relativity", "slider-c", "label-c",
+    "check-coulomb", "slider-ke", "label-ke", "select-collision", "slider-trail",
+    "label-trail", "select-dot-style", "select-tracking", "bodies-tbody",
+    "time-readout", "val-drift", "val-virial", "val-ke", "val-pe",
+  ]) {
+    el[id] = document_.getElementById(id);
+  }
 
   const state = {
     scenario: null,
     world: null,
-    trails: new Map(),
-    playing: false,
-    speed: 1.0,
-    energy0: 0.0,
-    totalSteps: 0,
-    raf: 0,
+    trails: [],
+    paused: false,
+    dt: 0.01,
+    maxTrails: 800,
+    timeDirection: 1.0,
+    timeWarp: 1.0,
+    initialEnergy: 0.0,
+    driftHistory: [],
+    trackingIndex: -1,
+    pan: { x: 0, y: 0 },
+    zoom: 1.0,
+    collisionMode: "bounce",
+    bounceRadius: 0.06,
+    restitution: 0.95,
+    mergeRadius: 0.04,
+    dotStyle: "line",
   };
 
-  function resetWorld() {
-    const option = state.scenario;
-    let useC = null;
-    if (elements.relativity.checked) {
-      const cValue = elements.cLight.value.trim();
-      const cOver = cValue === "" ? null : Number(cValue);
-      useC = (cOver !== null && Number.isFinite(cOver) && cOver > 0.0) ? cOver : option.c;
-    }
-    const kValue = elements.kCoulomb.value.trim();
-    const kOver = kValue === "" ? null : Number(kValue);
-    const useK = (kOver !== null && Number.isFinite(kOver) && kOver >= 0.0) ? kOver : option.k_e;
-    state.world = new World(option.bodies, option.g, { c: useC, k_e: useK });
-    state.trails = new Map(option.bodies.map((body) => [body.name, []]));
-    state.energy0 = state.world.totalEnergy();
-    logEvent(`loaded ${option.key} (t = 0)`);
-  }
-
-  function logEvent(message) {
-    const row = document_.createElement("li");
-    row.textContent = message;
-    elements.events.prepend(row);
-    while (elements.events.childElementCount > 6) {
-      elements.events.lastChild.remove();
-    }
-  }
-
-  function selectScenario(key) {
-    const fresh = !state.scenario || state.scenario.key !== key;
-    state.scenario = scenarios.find((option) => option.key === key) || scenarios[0];
-    elements.description.textContent = state.scenario.description;
-    elements.units.textContent =
-      `dt = ${state.scenario.dt} ${state.scenario.timeUnit} · ` +
-      `span = ${state.scenario.span} ${state.scenario.distanceUnit} · ` +
-      `speeds in ${state.scenario.speedUnit}`;
-    if (fresh) {
-      // Default the physics inputs from the scenario only on a scenario
-      // switch; a restart must keep the user's own toggles intact.
-      elements.relativity.checked = state.scenario.c !== null;
-      elements.cLight.value = state.scenario.c === null ? "" : String(state.scenario.c);
-      elements.kCoulomb.value = String(state.scenario.k_e);
-      elements.trailLength.value = String(Math.min(state.scenario.trailLength, 4000));
-    }
-    resetWorld();
-    draw();
-  }
-
-  function worldToScreen(width, height) {
-    const [ex, ey] = state.scenario.extent;
-    const scale = Math.min(width / (2 * ex), height / (2 * ey));
-    const offsetX = width / 2;
-    const offsetY = height / 2;
-    return (x, y) => [offsetX + x * scale, offsetY - y * scale];
-  }
-
-  function draw() {
-    const ratio = globalThis.devicePixelRatio || 1;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-    }
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const gradient = context.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, "#0b1220");
-    gradient.addColorStop(1, "#06060b");
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, width, height);
-    if (!state.world) {
+  // Clamp a slider by widening its range, so overrides outside the default
+  // bounds are shown and used instead of being silently snapped.
+  function setSliderValue(slider, value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
       return;
     }
-    const project = worldToScreen(width, height);
-    if (elements.trails.checked) {
-      context.lineWidth = 1;
-      context.globalAlpha = 0.4;
-      for (const body of state.world.bodies) {
-        const trail = state.trails.get(body.name);
-        if (!trail || trail.length < 2) {
-          continue;
-        }
-        context.strokeStyle = body.color;
-        context.beginPath();
-        const [sx, sy] = project(trail[0][0], trail[0][1]);
-        context.moveTo(sx, sy);
-        for (let index = 1; index < trail.length; index++) {
-          const [tx, ty] = project(trail[index][0], trail[index][1]);
-          context.lineTo(tx, ty);
-        }
-        context.stroke();
-      }
-      context.globalAlpha = 1.0;
-    }
-    const maxMass = Math.max(...state.world.bodies.map((body) => body.mass));
-    for (const body of state.world.bodies) {
-      const [sx, sy] = project(body.x, body.y);
-      const radius = 2.5 + 8.0 * Math.sqrt(body.mass / maxMass);
-      context.beginPath();
-      context.arc(sx, sy, radius, 0, 2 * Math.PI);
-      context.fillStyle = body.color;
-      context.fill();
-    }
-    telemetry();
+    slider.min = String(Math.min(parseFloat(slider.min), number));
+    slider.max = String(Math.max(parseFloat(slider.max), number));
+    slider.value = String(number);
+    return number;
   }
 
-  function telemetry() {
-    const world = state.world;
-    const drift = world.energyDrift(state.energy0);
-    const format = (value) => {
-      if (!Number.isFinite(value)) {
-        return String(value);
-      }
-      const magnitude = Math.abs(value);
-      if (magnitude !== 0.0 && (magnitude < 1e-3 || magnitude >= 1e6)) {
-        return value.toExponential(4);
-      }
-      return value.toFixed(Math.max(0, 6 - Math.floor(Math.log10(magnitude || 1))));
-    };
-    const lNorm = world.momentum();
-    const rows = [
-      `t = ${format(world.time)} ${state.scenario.timeUnit}`,
-      `bodies = ${world.bodies.length}`,
-      `E = ${format(world.totalEnergy())}`,
-      `dE/E = ${format(drift)}`,
-      `|p| = ${format(Math.hypot(lNorm.x, lNorm.y))}`,
-      `L = ${format(world.angularMomentum())}`,
-    ];
-    const cLabel = world.c === null ? "Newtonian" : `1PN (c = ${world.c})`;
-    rows.push(cLabel);
-    elements.telemetry.textContent = rows.join("  ·  ");
-  }
-
-  function recordTrails(stepCount) {
-    if (!elements.trails.checked) {
-      return;
+  function rebuildWorld(scenario, preserveWorld) {
+    const previous = preserveWorld ? state.world : null;
+    state.world = new World(
+      previous ? previous.bodies.map(cloneBody) : scenario.bodies,
+      scenario.g,
+      {
+        c: documentRelativityC(scenario),
+        k_e: documentCoulombK(scenario),
+        time: previous ? previous.time : 0.0,
+      },
+    );
+    if (!preserveWorld) {
+      state.trails = scenario.bodies.map(() => []);
     }
-    const every = state.scenario.recordEvery;
-    if (stepCount % every !== 0) {
-      return;
-    }
-    const limit = Number(elements.trailLength.value) || state.scenario.trailLength;
-    for (const body of state.world.bodies) {
-      let trail = state.trails.get(body.name);
-      if (!trail) {
-        trail = [];
-        state.trails.set(body.name, trail);
-      }
-      trail.push([body.x, body.y]);
-      if (trail.length > limit) {
-        trail.splice(0, trail.length - limit);
-      }
+    if (!preserveWorld) {
+      state.initialEnergy = state.world.totalEnergy();
+      state.driftHistory = [0.0];
+      state.pan = { x: 0, y: 0 };
+      state.zoom = 1.0;
+      state.trackingIndex = -1;
     }
   }
 
-  function tick() {
-    if (!state.playing || !state.world) {
-      return;
+  function documentRelativityC(scenario) {
+    if (!el["check-relativity"].checked) {
+      return null;
     }
-    const steps = Math.max(1, Math.round(state.scenario.stepsPerFrame * state.speed));
-    const baseStep = state.totalSteps;
-    for (let index = 0; index < steps; index++) {
-      state.world.step(state.scenario.dt);
-      state.totalSteps = baseStep + index + 1;
-      recordTrails(state.totalSteps);
-      const mergeRadius = elements.merge.checked ? Number(elements.mergeRadius.value) : 0.0;
-      const bounceRadius = elements.bounce.checked ? Number(elements.bounceRadius.value) : 0.0;
-      const restitution = Number(elements.restitution.value);
-      if (mergeRadius > 0.0) {
-        for (const event of state.world.resolveCollisions(mergeRadius)) {
-          logEvent(event);
-        }
-      }
-      if (bounceRadius > 0.0) {
-        for (const event of state.world.resolveElasticCollisions(bounceRadius, restitution)) {
-          logEvent(event);
-        }
-      }
+    const raw = el["slider-c"].value;
+    const override = raw === "" ? null : Number(raw);
+    if (override === null) {
+      return scenario.c;
     }
-    draw();
-    state.raf = requestAnimationFrame(tick);
+    return Number.isFinite(override) && override > 0.0 ? override : scenario.c;
   }
 
-  function setPlaying(next) {
-    state.playing = next;
-    elements.play.textContent = next ? "Pause" : "Play";
-    if (next) {
-      state.raf = requestAnimationFrame(tick);
-    } else {
-      cancelAnimationFrame(state.raf);
+  function documentCoulombK(scenario) {
+    if (!el["check-coulomb"].checked) {
+      return 0.0;
     }
+    const override = Number(el["slider-ke"].value);
+    if (Number.isFinite(override) && override >= 0.0) {
+      return override;
+    }
+    return scenario.k_e;
   }
 
-  for (const option of scenarios) {
-    const item = document_.createElement("option");
-    item.value = option.key;
-    item.textContent = option.title;
-    elements.scenario.append(item);
+  function loadScenario(scenario) {
+    state.scenario = scenario;
+    state.dt = scenario.dt;
+    state.maxTrails = scenario.trailLength || 800;
+    state.paused = false;
+    el["btn-play"].textContent = "\u23F8";
+
+    setSliderValue(el["slider-trail"], state.maxTrails);
+    el["label-trail"].textContent = String(state.maxTrails);
+    el["scenario-desc"].textContent = scenario.description;
+    el["units-badge"].textContent = `${scenario.distanceUnit}, ${scenario.timeUnit}`;
+    setSliderValue(el["slider-dt"], scenario.dt);
+    el["label-dt"].textContent = String(scenario.dt);
+    el["check-relativity"].checked = scenario.c !== null;
+    if (scenario.c !== null) {
+      setSliderValue(el["slider-c"], scenario.c);
+    }
+    el["check-coulomb"].checked = scenario.k_e > 0.0;
+    if (scenario.k_e) {
+      setSliderValue(el["slider-ke"], scenario.k_e);
+    }
+    el["label-ke"].textContent = "ke=" + String(scenario.k_e);
+    const cLabel = scenario.c !== null ? String(scenario.c) : el["slider-c"].value;
+    el["label-c"].textContent = "c=" + cLabel;
+
+    rebuildWorld(scenario, false);
+    updateTrackingSelect();
+    el["select-tracking"].value = "-1";
+    el["select-collision"].value = state.collisionMode;
   }
 
-  elements.scenario.addEventListener("change", () => {
-    setPlaying(false);
-    selectScenario(elements.scenario.value);
-  });
-  elements.play.addEventListener("click", () => setPlaying(!state.playing));
-  elements.step.addEventListener("click", () => {
-    setPlaying(false);
-    if (state.world) {
-      state.world.step(state.scenario.dt);
-      state.totalSteps += 1;
-      recordTrails(state.totalSteps);
-      draw();
+  function updateTrackingSelect() {
+    const select = el["select-tracking"];
+    while (select.firstChild) {
+      select.firstChild.remove();
     }
-  });
-  elements.reset.addEventListener("click", () => {
-    setPlaying(false);
-    selectScenario(elements.scenario.value);
-  });
-  elements.speed.addEventListener("input", () => {
-    state.speed = Number(elements.speed.value);
-    elements.speedLabel.textContent = `${state.speed.toFixed(2)}x`;
-  });
-  elements.relativity.addEventListener("change", () => {
-    setPlaying(false);
-    selectScenario(elements.scenario.value);
-  });
-  elements.merge.addEventListener("change", () => {
-    elements.mergeRadius.disabled = !elements.merge.checked;
-  });
-  elements.bounce.addEventListener("change", () => {
-    elements.bounceRadius.disabled = !elements.bounce.checked;
-    elements.restitution.disabled = !elements.bounce.checked;
-  });
-  [elements.cLight, elements.kCoulomb, elements.restitution].forEach((input) => {
-    input.addEventListener("change", () => {
-      setPlaying(false);
-      selectScenario(elements.scenario.value);
+    const free = document_.createElement("option");
+    free.value = "-1";
+    free.textContent = "Barycentre (Free)";
+    select.appendChild(free);
+    state.world.bodies.forEach((body, index) => {
+      const option = document_.createElement("option");
+      option.value = String(index);
+      option.textContent = `${body.name} (${body.symbol})`;
+      select.appendChild(option);
     });
+    if (state.trackingIndex >= 0 && state.trackingIndex < state.world.bodies.length) {
+      select.value = String(state.trackingIndex);
+    } else {
+      state.trackingIndex = -1;
+      select.value = "-1";
+    }
+  }
+
+  function stepWorld(dt) {
+    state.world.step(dt);
+    if (state.collisionMode === "bounce") {
+      state.world.resolveElasticCollisions(state.bounceRadius, state.restitution);
+    } else if (state.collisionMode === "merge") {
+      const before = state.world.bodies.length;
+      state.world.resolveCollisions(state.mergeRadius);
+      if (state.world.bodies.length !== before) {
+        // A merge drops one body at an arbitrary index; splicing keeps the
+        // wrong history and draws a spurious line across the scene.
+        // Reseed every trail from the current positions (mirrors ADR-014).
+        state.trails = state.world.bodies.map((body) => [{ x: body.x, y: body.y }]);
+        if (state.trackingIndex >= state.world.bodies.length) {
+          state.trackingIndex = -1;
+        }
+        updateTrackingSelect();
+      }
+    }
+  }
+
+  // Interactive pan and zoom
+  let isDragging = false;
+  let dragStart = { x: 0, y: 0 };
+  canvas.addEventListener("mousedown", (event) => {
+    isDragging = true;
+    dragStart = { x: event.clientX, y: event.clientY };
   });
-  globalThis.addEventListener("resize", draw);
+  globalThis.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+  canvas.addEventListener("mousemove", (event) => {
+    if (!isDragging) {
+      return;
+    }
+    const dx = event.clientX - dragStart.x;
+    const dy = event.clientY - dragStart.y;
+    dragStart = { x: event.clientX, y: event.clientY };
+    const worldScale = (state.scenario.span * state.zoom)
+      / Math.min(canvas.clientWidth, canvas.clientHeight);
+    state.pan.x -= dx * worldScale;
+    state.pan.y += dy * worldScale;
+    state.trackingIndex = -1;
+    el["select-tracking"].value = "-1";
+  });
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const factor = event.deltaY > 0 ? 1.15 : 0.85;
+    state.zoom = Math.max(0.02, Math.min(50.0, state.zoom * factor));
+  });
 
-  selectScenario(scenarioFromKeyOrFirst(scenarios));
-  setPlaying(true);
-}
+  // UI button bindings
+  el["btn-play"].addEventListener("click", () => {
+    state.paused = !state.paused;
+    el["btn-play"].textContent = state.paused ? "\u25B6" : "\u23F8";
+  });
+  el["btn-reverse"].addEventListener("click", () => {
+    state.timeDirection *= -1.0;
+    el["btn-reverse"].textContent = state.timeDirection > 0 ? "FORWARD" : "REVERSE";
+    el["btn-reverse"].className = state.timeDirection > 0
+      ? "badge badge-forward"
+      : "badge badge-reverse";
+  });
+  el["btn-step-fwd"].addEventListener("click", () => stepWorld(state.dt));
+  el["btn-step-back"].addEventListener("click", () => stepWorld(-state.dt));
+  el["btn-warp-up"].addEventListener("click", () => {
+    state.timeWarp = Math.min(50.0, +(state.timeWarp * 1.5).toFixed(2));
+    el["warp-label"].textContent = state.timeWarp + "x";
+  });
+  el["btn-warp-down"].addEventListener("click", () => {
+    state.timeWarp = Math.max(0.05, +(state.timeWarp / 1.5).toFixed(2));
+    el["warp-label"].textContent = state.timeWarp + "x";
+  });
+  el["btn-reset"].addEventListener("click", () => {
+    loadScenario(state.scenario);
+  });
+  el["btn-toggle-hud"].addEventListener("click", () => {
+    el["hud-panel"].classList.toggle("collapsed");
+  });
+  el["slider-dt"].addEventListener("input", (event) => {
+    state.dt = parseFloat(event.target.value);
+    el["label-dt"].textContent = String(state.dt);
+  });
+  el["slider-c"].addEventListener("input", (event) => {
+    el["label-c"].textContent = "c=" + event.target.value;
+    if (el["check-relativity"].checked) {
+      rebuildWorld(state.scenario, true);
+    }
+  });
+  el["slider-ke"].addEventListener("input", (event) => {
+    el["label-ke"].textContent = "ke=" + event.target.value;
+    if (el["check-coulomb"].checked) {
+      rebuildWorld(state.scenario, true);
+    }
+  });
+  el["check-relativity"].addEventListener("change", () => {
+    rebuildWorld(state.scenario, true);
+  });
+  el["check-coulomb"].addEventListener("change", () => {
+    rebuildWorld(state.scenario, true);
+  });
+  el["slider-trail"].addEventListener("input", (event) => {
+    state.maxTrails = parseInt(event.target.value, 10);
+    el["label-trail"].textContent = String(state.maxTrails);
+  });
+  el["select-collision"].addEventListener("change", (event) => {
+    state.collisionMode = event.target.value;
+  });
+  el["select-dot-style"].addEventListener("change", (event) => {
+    state.dotStyle = event.target.value;
+  });
+  el["select-tracking"].addEventListener("change", (event) => {
+    state.trackingIndex = parseInt(event.target.value, 10);
+  });
+  if (typeof globalThis.addEventListener === "function") {
+    globalThis.addEventListener("resize", resizeCanvases);
+  }
 
-function scenarioFromKeyOrFirst(scenarios) {
-  const wanted = new URLSearchParams(location.search).get("world");
-  return (wanted && scenarios.find((option) => option.key === wanted))
-    ? wanted
-    : scenarios[0].key;
+  function resizeCanvases() {
+    canvas.width = canvas.clientWidth * (globalThis.devicePixelRatio || 1);
+    canvas.height = canvas.clientHeight * (globalThis.devicePixelRatio || 1);
+    energyCanvas.width = energyCanvas.clientWidth * (globalThis.devicePixelRatio || 1);
+    energyCanvas.height = energyCanvas.clientHeight * (globalThis.devicePixelRatio || 1);
+  }
+  resizeCanvases();
+
+  // Custom scenario upload: validated in-process by the same rules the server
+  // loader applies (mirrors orrery/custom.py), so the sealed build needs no
+  // backend for uploads.
+  el["btn-upload"].addEventListener("click", () => {
+    el["file-input"].click();
+  });
+  el["file-input"].addEventListener("change", (event) => {
+    const file = event.target.files
+      ? event.target.files[0]
+      : (event.target.filesProxy ? event.target.filesProxy[0] : null);
+    if (!file) {
+      return;
+    }
+    const reader = new globalThis.FileReader();
+    reader.onload = (ev) => {
+      let parsed;
+      try {
+        parsed = JSON.parse(ev.target.result);
+      } catch (error) {
+        globalThis.alert("Invalid JSON file");
+        return;
+      }
+      const result = validateScenarioDocument(JSON.stringify(parsed));
+      if (result.valid) {
+        const select = el["scenario-select"];
+        const option = document_.createElement("option");
+        option.value = result.key;
+        option.textContent = `${result.title} (${result.bodies} bodies)`;
+        select.appendChild(option);
+        select.value = result.key;
+        state.scenario = result.entry;
+        loadScenario(result.entry);
+        globalThis.alert(`Loaded custom scenario: ${result.title}`);
+      } else {
+        globalThis.alert(`Validation error: ${result.error}`);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // World selector bootstrapping
+  for (const item of scenarioCatalogue(scenarios)) {
+    const option = document_.createElement("option");
+    option.value = item.key;
+    option.textContent = `${item.title} (${item.bodies} bodies)`;
+    el["scenario-select"].appendChild(option);
+  }
+  let initial = "solar";
+  if (typeof URLSearchParams === "function" && globalThis.location
+      && typeof globalThis.location.search === "string") {
+    const wanted = new URLSearchParams(globalThis.location.search).get("world");
+    if (wanted && scenarios.some((scenario) => scenario.key === wanted)) {
+      initial = wanted;
+    }
+  }
+  el["scenario-select"].value = initial;
+  loadScenario(scenarios.find((scenario) => scenario.key === initial) || scenarios[0]);
+
+  el["scenario-select"].addEventListener("change", (event) => {
+    const wanted = scenarios.find((scenario) => scenario.key === event.target.value);
+    if (wanted) {
+      loadScenario(wanted);
+    }
+  });
+
+  // Render & animation loop
+  let frameCount = 0;
+  function animate() {
+    state.raf = globalThis.requestAnimationFrame(animate);
+
+    if (!state.paused) {
+      const stepsToRun = Math.max(1, Math.round(state.timeWarp));
+      const subDt = (state.dt * state.timeDirection * state.timeWarp) / stepsToRun;
+      for (let index = 0; index < stepsToRun; index++) {
+        stepWorld(subDt);
+      }
+      for (let index = 0; index < state.world.bodies.length; index++) {
+        if (!state.trails[index]) {
+          state.trails[index] = [];
+        }
+        const body = state.world.bodies[index];
+        state.trails[index].push({ x: body.x, y: body.y });
+        if (state.trails[index].length > state.maxTrails) {
+          state.trails[index].shift();
+        }
+      }
+    }
+
+    const width = canvas.width;
+    const height = canvas.height;
+    context.clearRect(0, 0, width, height);
+
+    let centerX = state.pan.x;
+    let centerY = state.pan.y;
+    if (state.trackingIndex >= 0 && state.trackingIndex < state.world.bodies.length) {
+      centerX = state.world.bodies[state.trackingIndex].x + state.pan.x;
+      centerY = state.world.bodies[state.trackingIndex].y + state.pan.y;
+    }
+
+    const viewSpan = state.scenario.span * state.zoom;
+    const scale = Math.min(width, height) / viewSpan;
+    const originX = width * 0.5;
+    const originY = height * 0.5;
+
+    function toScreen(x, y) {
+      return {
+        x: originX + (x - centerX) * scale,
+        y: originY - (y - centerY) * scale,
+      };
+    }
+
+    // Draw orbit trails
+    for (let index = 0; index < state.world.bodies.length; index++) {
+      const trail = state.trails[index];
+      if (!trail || trail.length < 2) {
+        continue;
+      }
+      const color = COLOR_PALETTE[state.world.bodies[index].color] || "#ffffff";
+
+      if (state.dotStyle === "line") {
+        context.beginPath();
+        for (let point = 0; point < trail.length; point++) {
+          const pt = toScreen(trail[point].x, trail[point].y);
+          if (point === 0) {
+            context.moveTo(pt.x, pt.y);
+          } else {
+            context.lineTo(pt.x, pt.y);
+          }
+        }
+        context.strokeStyle = color;
+        context.lineWidth = 1.5;
+        context.globalAlpha = 0.45;
+        context.stroke();
+        context.globalAlpha = 1.0;
+      } else {
+        context.fillStyle = color;
+        context.strokeStyle = color;
+        for (let point = 0; point < trail.length; point += 2) {
+          const pt = toScreen(trail[point].x, trail[point].y);
+          context.globalAlpha = 0.2 + 0.8 * (point / trail.length);
+          context.beginPath();
+          if (state.dotStyle === "circle" || state.dotStyle === "ring") {
+            context.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+            context.stroke();
+          } else {
+            context.arc(pt.x, pt.y, 2.0, 0, Math.PI * 2);
+            context.fill();
+          }
+        }
+        context.globalAlpha = 1.0;
+      }
+    }
+
+    // Draw celestial bodies
+    const fontFamily = typeof globalThis.getComputedStyle === "function" && document_.body
+      ? globalThis.getComputedStyle(document_.body).fontFamily
+      : "sans-serif";
+    for (const body of state.world.bodies) {
+      const pt = toScreen(body.x, body.y);
+      const color = COLOR_PALETTE[body.color] || "#ffffff";
+
+      // Glow halo
+      const gradient = context.createRadialGradient(pt.x, pt.y, 1, pt.x, pt.y, 14);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, "transparent");
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.arc(pt.x, pt.y, 14, 0, Math.PI * 2);
+      context.fill();
+
+      // Body core
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+      context.fill();
+
+      // Name & symbol
+      context.font = "11px " + fontFamily;
+      context.fillStyle = "#ffffff";
+      context.fillText(`${body.name} (${body.symbol})`, pt.x + 8, pt.y - 6);
+    }
+
+    // Update HUD metrics every 4 frames
+    frameCount++;
+    if (frameCount % 4 === 0) {
+      const world = state.world;
+      el["time-readout"].textContent =
+        `t = ${world.time.toFixed(2)} ${state.scenario.timeUnit}`;
+      const kinetic = world.kineticEnergy();
+      const potential = world.potentialEnergy();
+      const total = kinetic + potential;
+      const drift = state.initialEnergy !== 0.0
+        ? (total - state.initialEnergy) / Math.abs(state.initialEnergy)
+        : 0.0;
+      state.driftHistory.push(drift);
+      if (state.driftHistory.length > 80) {
+        state.driftHistory.shift();
+      }
+
+      el["val-drift"].textContent = (drift >= 0 ? "+" : "") + drift.toExponential(2);
+      el["val-virial"].textContent = (2.0 * kinetic + potential).toExponential(2);
+      el["val-ke"].textContent = kinetic.toExponential(2);
+      el["val-pe"].textContent = potential.toExponential(2);
+
+      // Render the energy-drift sparkline
+      energyContext.clearRect(0, 0, energyCanvas.width, energyCanvas.height);
+      if (state.driftHistory.length > 1) {
+        const chartWidth = energyCanvas.width;
+        const chartHeight = energyCanvas.height;
+        const minVal = Math.min(...state.driftHistory);
+        const maxVal = Math.max(...state.driftHistory);
+        const range = Math.max(1e-12, maxVal - minVal);
+        energyContext.beginPath();
+        for (let index = 0; index < state.driftHistory.length; index++) {
+          const hx = (index / (state.driftHistory.length - 1)) * chartWidth;
+          const hy = chartHeight
+            - ((state.driftHistory[index] - minVal) / range) * (chartHeight - 8) - 4;
+          if (index === 0) {
+            energyContext.moveTo(hx, hy);
+          } else {
+            energyContext.lineTo(hx, hy);
+          }
+        }
+        energyContext.strokeStyle = "#00e5ff";
+        energyContext.lineWidth = 2.0;
+        energyContext.stroke();
+      }
+
+      // Update the bodies table
+      const tbody = el["bodies-tbody"];
+      while (tbody.firstChild) {
+        tbody.firstChild.remove();
+      }
+      for (const body of state.world.bodies) {
+        const row = document_.createElement("tr");
+        const speedCell = document_.createElement("td");
+        speedCell.marker = true;
+        const marker = document_.createElement("span");
+        const color = COLOR_PALETTE[body.color] || "#ffffff";
+        marker.style = color;
+        marker.color = color;
+        marker.textContent = "\u25CF " + body.name;
+        const massCell = document_.createElement("td");
+        massCell.textContent = body.mass.toExponential(1);
+        const velocityCell = document_.createElement("td");
+        velocityCell.textContent = Math.hypot(body.vx, body.vy).toFixed(2);
+        const distanceCell = document_.createElement("td");
+        distanceCell.textContent = Math.hypot(body.x, body.y).toFixed(2);
+        speedCell.appendChild(marker);
+        row.append(speedCell, massCell, velocityCell, distanceCell);
+        tbody.appendChild(row);
+      }
+    }
+  }
+
+  globalThis.requestAnimationFrame(animate);
 }
