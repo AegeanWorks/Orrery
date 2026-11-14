@@ -62,5 +62,10 @@
     "aegean-science-license",
     "research",
     "commercial-license"
-  ]
+  ],
+  "archived": true,
+  "archived_at": "2026-11-14",
+  "archive_reason": "Complete and retired: URL options, boot handshake, watchdog fix and HUD-collapse refit all shipped; no further work planned. Live card remains playable per ADR-083.",
+  "archive_repo": "AegeanWorks/Orrery",
+  "archive_description": "[ARCHIVED] An N-body gravitational sandbox that runs in your terminal or in your browser. Nine carefully chosen worlds, a symplectic integrator, optional relativity and collision physics, live energy diagnostics, orbit trails, CSV and JSON export, and no dependencies outside the Python standard library."
 }
