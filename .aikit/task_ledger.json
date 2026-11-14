@@ -1,57 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "orrery-hud-resize",
-    "last_phase": "verification",
+    "task_id": "orrery-archive",
+    "last_phase": "verify",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794671807.874482,
+    "updated_at": 1794672516.7153401,
     "owner": "claude:compaction",
     "started_by": "claude:compaction",
     "continuations": [],
-    "completed_at": 1794671808.1302454
+    "completed_at": 1794672517.0409503
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 20",
-      "phase_num": 3,
-      "description": "Reforge stage 20: window 60, 4 commit(s), 9 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794646670.6158118,
-      "timestamp_str": "2026-11-14 11:57:50",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 20",
-      "phase_num": 3,
-      "description": "Reforge stage 20: stage 20 host review reviewed; run completed; coverage 26/26",
-      "files_affected": [],
-      "status": "completed",
-      "timestamp": 1794646763.6696033,
-      "timestamp_str": "2026-11-14 11:59:23",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "orrery-live-port",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Plan the sealed browser build: JS port of the sim core, canvas UI, node parity tests, live app registry entry",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794648811.0239067,
-      "timestamp_str": "2026-11-14 12:33:31",
-      "agent": "vibe:orrery-live",
-      "impact_assessment": {
-        "why": "The AegeanWorks Live page serves fully static builds with no network; Orrery currently only runs as a Python process, so the studio site cannot host it in-page",
-        "benefits": "Orrery becomes playable on aegeanworks.github.io like the other live apps; parity tests keep the port honest against the Python core",
-        "risks": "contract: live build must never call fetch/XHR/WebSocket or load external URLs; JS core must reproduce leapfrog/1PN/Coulomb/merge/bounce bit-close; dependency: node only for optional parity tests (skipUnless); concurrency: none; state: appends live.json and docs/live in AegeanWorks",
-        "mitigation": "Port first, dump-then-compare parity tests against Python for all nine golden scenarios, validate_source + REUSE checks before any commit; no push without authorization"
-      },
-      "plan_digest": "2a6e13aa8b2498220e9ed872e77deadeb9d88cc05e6063ab7d3908c6b25c1150"
-    },
     {
       "task_id": "orrery-live-port",
       "phase": "verification",
@@ -295,6 +255,52 @@
       "status": "completed",
       "timestamp": 1794671808.1302497,
       "timestamp_str": "2026-11-14 18:56:48",
+      "agent": "claude:compaction",
+      "delivery": {
+        "roots": [
+          "C:\\Users\\Yunus-Emre\\Desktop\\portable_agent_kit\\projects\\orrery"
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "orrery-archive",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/2] Archive orrery: move to projects/archive, flip GitHub repo read-only, flag live catalog archived:true",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794672488.7703059,
+      "timestamp_str": "2026-11-14 19:08:08",
+      "agent": "claude:compaction",
+      "impact_assessment": {
+        "why": "User requested retirement; all open work complete",
+        "benefits": "Honest lifecycle state; live card stays playable per ADR-083; repo locked against further commits",
+        "risks": "contract: read-only remote prevents future fixes; dependency: none as the app is self-contained; concurrency: kit-root move touches shared tree so another agent may hold the ledger; state: ledger must be completed before the move",
+        "mitigation": "Ledger completed pre-move; catalog flag verified against sync --check; no further orrery builds planned"
+      },
+      "plan_digest": "b671c14770930635de3ecdc3b21977cd61b233565127fbb4abd31de4b422ae8f"
+    },
+    {
+      "task_id": "orrery-archive",
+      "phase": "verify",
+      "phase_num": 4,
+      "description": "[2/2] Archive ledger task; remote flip happens after this commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794672516.7153401,
+      "timestamp_str": "2026-11-14 19:08:36",
+      "agent": "claude:compaction",
+      "checklists": "passed: ledger checkpoint, no code change, catalog flag planned in AegeanWorks"
+    },
+    {
+      "task_id": "orrery-archive",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'orrery-archive' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794672517.0409536,
+      "timestamp_str": "2026-11-14 19:08:37",
       "agent": "claude:compaction",
       "delivery": {
         "roots": [
