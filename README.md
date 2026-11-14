@@ -10,6 +10,8 @@ chosen worlds, a symplectic integrator, optional relativity and collision physic
 diagnostics, orbit trails, CSV and JSON export, and no dependencies outside the Python standard
 library.
 
+> **Archived**: Complete and retired: URL options, boot handshake, watchdog fix and HUD-collapse refit all shipped; no further work planned. Live card remains playable per ADR-083. (archived 2026-11-14). This project is read-only; its GitHub repository is archived.
+
 ## ⚡ 30-Second Cold-Start Quick Reference
 
 - **Runtime Prerequisites**: Python 3.10 or newer (standard library only; no runtime packages)
