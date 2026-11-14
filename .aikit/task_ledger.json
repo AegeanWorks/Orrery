@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "orrery-live-port",
+    "task_id": "orrery-sealed-studio",
     "last_phase": "verification",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794649976.8463554,
-    "owner": "vibe:orrery-live",
-    "started_by": "vibe:orrery-live",
-    "continuations": [],
-    "completed_at": 1794650494.6324608
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794655430.4480534,
+    "owner": "claude:compaction",
+    "started_by": "claude:compaction",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 13",
-      "phase_num": 3,
-      "description": "Reforge stage 13: stage 13 host review reviewed; run active; coverage 39/39",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794644199.4960277,
-      "timestamp_str": "2026-11-14 11:16:39",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 13",
-      "phase_num": 3,
-      "description": "Reforge stage 13: stage 13 host review reviewed; run active; coverage 39/39",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794644339.0176551,
-      "timestamp_str": "2026-11-14 11:18:59",
-      "agent": "unidentified"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 13",
@@ -257,6 +234,36 @@
       "timestamp": 1794650494.6324623,
       "timestamp_str": "2026-11-14 13:01:34",
       "agent": "vibe:orrery-live"
+    },
+    {
+      "task_id": "orrery-sealed-studio",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Port the local studio UI into the sealed build and retake site shots",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794655423.44859,
+      "timestamp_str": "2026-11-14 14:23:43",
+      "agent": "claude:compaction",
+      "impact_assessment": {
+        "why": "the sealed live-site build only had a thin shell, so the live page looked worse than the local studio and its homepage shots were near-black frames",
+        "benefits": "the AegeanWorks live embed now shows the full HUD/telemetry/energy/camera/warp studio with working custom uploads",
+        "risks": "contract: validator messages must match orrery.custom bit-exactly; dependency: sealed build must stay dependency-free; concurrency: none (single-repo edits); state: ledger parity files",
+        "mitigation": "parity harness drove by the real Python loader; engine core untouched; full unittest + smoke suites before commit"
+      },
+      "plan_digest": "8aa75468499406ce73ed8998965680b1ef569f3c74cd81c76fb34d52b7193205"
+    },
+    {
+      "task_id": "orrery-sealed-studio",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[1/1] Verification: 156 unittests, step smoke harness, ruff, knowledge base",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794655430.4480534,
+      "timestamp_str": "2026-11-14 14:23:50",
+      "agent": "claude:compaction",
+      "checklists": "passed: unittest(156), studio_smoke, custom validator parity, ruff, update_knowledge_base, check_secrets"
     }
   ]
 }

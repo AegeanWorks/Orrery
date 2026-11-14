@@ -214,8 +214,7 @@ orrery/
 ├── data/
 │   └── scenarios.js          <- generated: initial conditions dumped from the Python scenarios
 ├── src/
-│   ├── orrery.js             <- bit-exact JS port of orrery/sim.py plus the canvas studio
-│   └── styles.css
+│   └── orrery.js             <- bit-exact JS port of orrery/sim.py plus the canvas studio
 ├── tools/
 │   └── dump_scenarios.py     <- regenerates data/scenarios.js through the real Python code
 ├── orrery/
@@ -233,9 +232,11 @@ orrery/
     ├── __init__.py
     ├── golden/               <- deterministic ASCII frames per scenario
     ├── live_parity.cjs       <- Node harness: replays parity cases against src/orrery.js
+    ├── custom_validate.cjs   <- Node harness: sealed upload validator vs the Python loader
     ├── studio_smoke.cjs      <- Node harness: boots the studio against a DOM stub
     ├── test_cli.py
     ├── test_custom.py
+    ├── test_custom_sealed_parity.py  <- Python gate: upload validator vs orrery.custom
     ├── test_golden.py
     ├── test_invariants.py
     ├── test_launchers.py

@@ -6,14 +6,14 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `22`
-- **Total Classes**: `32`
-- **Total Top-Level Functions**: `86`
-- **Total Class Methods**: `223`
-- **Total Source Lines**: `6562`
+- **Total Python Modules**: `23`
+- **Total Classes**: `34`
+- **Total Top-Level Functions**: `90`
+- **Total Class Methods**: `224`
+- **Total Source Lines**: `6749`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`22` module(s))
+- **Indexed**: python (`23` module(s))
 - **Not indexed by this map**: javascript (`2` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
@@ -352,6 +352,24 @@
 
 **Functions:**
 - `def run_cli(*argv)`
+
+---
+
+### [`tests/test_custom_sealed_parity.py`](tests/test_custom_sealed_parity.py)
+> *Parity between the sealed build's upload validator and the Python loader.*
+
+**Size**: `187` lines (`6783` bytes)
+
+**Classes:**
+- `class _Delete`
+- `class CustomSealedParityTests`
+  - Method `.test_sealed_validator_matches_the_python_loader()`
+
+**Functions:**
+- `def _base_document()`
+- `def _mutated(mutations, name)`
+- `def _cases()`
+- `def _expected(cases)`
 
 ---
 
