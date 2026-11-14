@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "orrery-live-port",
     "last_phase": "verification",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794649976.8463554,
     "owner": "vibe:orrery-live",
     "started_by": "vibe:orrery-live",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794650494.6324608
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 12",
-      "phase_num": 3,
-      "description": "Reforge stage 12: stage 12 host review reviewed; run active; coverage 91/91",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794644000.8035274,
-      "timestamp_str": "2026-11-14 11:13:20",
-      "agent": "unidentified"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 13",
@@ -256,6 +246,16 @@
       "status": "in_progress",
       "timestamp": 1794649976.8463554,
       "timestamp_str": "2026-11-14 12:52:56",
+      "agent": "vibe:orrery-live"
+    },
+    {
+      "task_id": "orrery-live-port",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'orrery-live-port' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794650494.6324623,
+      "timestamp_str": "2026-11-14 13:01:34",
       "agent": "vibe:orrery-live"
     }
   ]
