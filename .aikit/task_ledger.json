@@ -1,59 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "orrery-studio-fixes",
+    "task_id": "orrery-url-options",
     "last_phase": "verification",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794657163.7690446,
+    "updated_at": 1794658388.3987293,
     "owner": "claude:compaction",
     "started_by": "claude:compaction",
     "continuations": [],
-    "completed_at": 1794657164.0338638
+    "completed_at": 1794658388.6563146
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 19",
-      "phase_num": 3,
-      "description": "Reforge stage 19: window 56, 5 commit(s), 12 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, empty \u2014 nothing to commit, 2 binary not analysed",
-      "files_affected": [
-        "assets/screenshots/2026-11-03-figure-eight.png",
-        "assets/screenshots/2026-11-03-solar.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1794644612.88359,
-      "timestamp_str": "2026-11-14 11:23:32",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 19",
-      "phase_num": 3,
-      "description": "Reforge stage 19: stage 19 host review reviewed; run completed; coverage 29/29",
-      "files_affected": [],
-      "status": "completed",
-      "timestamp": 1794644653.5410237,
-      "timestamp_str": "2026-11-14 11:24:13",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "checklists: passed (Python 3.14); reforge run-1 complete: stages 1-19 reviewed, 26 commits audited, 5 accepted findings recorded",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794644761.3128438,
-      "timestamp_str": "2026-11-14 11:26:01",
-      "agent": "vibe:orrery-review",
-      "impact_assessment": {
-        "why": "Phase 4 gate outcome must be recorded before committing project memory (PRINCIPLE-001 R8, PRINCIPLE-011 R8)",
-        "benefits": "Delivery-ready review record with a traceable gate result",
-        "risks": "contract: none, ledger metadata only; dependency: none; concurrency: advisory-locked state file; state: ledger grows by one checkpoint",
-        "mitigation": "Atomic ledger write via the recovery tool; no code changes in this checkpoint"
-      }
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "completed",
@@ -276,6 +234,52 @@
       "status": "completed",
       "timestamp": 1794657164.0338674,
       "timestamp_str": "2026-11-14 14:52:44",
+      "agent": "claude:compaction",
+      "delivery": {
+        "roots": [
+          "C:\\Users\\Yunus-Emre\\Desktop\\portable_agent_kit\\projects\\orrery"
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "orrery-url-options",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Deep-link URL options and keyboard shortcuts for both studios",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794658371.7951968,
+      "timestamp_str": "2026-11-14 15:12:51",
+      "agent": "claude:compaction",
+      "impact_assessment": {
+        "why": "the sealed build could not reproduce the served studio's option overrides (applyWebOptions) or the tooltips' promised Space/R keys, so deep links and scripted demos were impossible",
+        "benefits": "index.html?world=X&rate=..&reverse=1&c=..&ke=..&collision=.. reproduces any served-studio configuration and Space/R work in both UIs",
+        "risks": "contract: keyboard must ignore form-control focus and e.repeat; dependency: no new deps; concurrency: none; state: README documents the parameters",
+        "mitigation": "failing-first tests: HTML_PAGE assertions and stub-recorded keydown dispatch; full unittest + smoke suites; headless Edge check of every parameter"
+      },
+      "plan_digest": "6c091c71cbd9c886bdffdcc513fccac35f273dd781286910e42961015c968130"
+    },
+    {
+      "task_id": "orrery-url-options",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[1/1] Verification: failing-first suites, unit 157, smoke, headless Edge",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794658388.3987293,
+      "timestamp_str": "2026-11-14 15:13:08",
+      "agent": "claude:compaction",
+      "checklists": "passed: studio_smoke(url options+keyboard), unittest(157), ruff, kb check, headless Edge parameter check"
+    },
+    {
+      "task_id": "orrery-url-options",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'orrery-url-options' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794658388.6563165,
+      "timestamp_str": "2026-11-14 15:13:08",
       "agent": "claude:compaction",
       "delivery": {
         "roots": [
