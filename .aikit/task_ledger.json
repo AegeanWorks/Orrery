@@ -3,8 +3,8 @@
   "active_task": {
     "task_id": "reforge-run1-remediation",
     "last_phase": "in_progress",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794646520.0233686,
     "owner": "vibe:orrery-review",
     "started_by": "vibe:orrery-review",
@@ -14,26 +14,10 @@
       "benefits": "Clean audit trail linking both new tests to their recorded findings",
       "risks": "contract: none beyond the planned signature semantics; dependency: none; concurrency: none; state: ledger only",
       "mitigation": "Failing-first tests drove both fixes; full suite and gates rerun after README and memory regeneration"
-    }
+    },
+    "completed_at": 1794646547.9969614
   },
   "checkpoints": [
-    {
-      "task_id": "orrery-wave-audit",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[3/4] Wave 20 survey: web parity, launchers, licensing; wave 30 out-of-scope note",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793723155.0240552,
-      "timestamp_str": "2026-11-03 19:25:55",
-      "agent": "kilo:audit",
-      "impact_assessment": {
-        "why": "Finish first-30 scope; wave 30 commits 30+ already covered by reforge run-1 stages 10-18",
-        "benefits": "Bounded audit, no duplicate work",
-        "risks": "contract: none yet; dependency: none; concurrency: none; state: ledger only",
-        "mitigation": "Verify remaining windows via reforge.json history"
-      }
-    },
     {
       "task_id": "orrery-wave-audit",
       "phase": "phase 4",
@@ -262,6 +246,16 @@
         "risks": "contract: none beyond the planned signature semantics; dependency: none; concurrency: none; state: ledger only",
         "mitigation": "Failing-first tests drove both fixes; full suite and gates rerun after README and memory regeneration"
       }
+    },
+    {
+      "task_id": "reforge-run1-remediation",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'reforge-run1-remediation' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794646547.9969647,
+      "timestamp_str": "2026-11-14 11:55:47",
+      "agent": "vibe:orrery-review"
     }
   ]
 }
