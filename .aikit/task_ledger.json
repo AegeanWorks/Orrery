@@ -1,27 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "orrery-url-options",
-    "last_phase": "verification",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794658388.3987293,
+    "task_id": "orrery-boot-handshake",
+    "last_phase": "planning",
+    "active_phase": 2,
+    "status": "in_progress",
+    "updated_at": 1794668359.3067365,
     "owner": "claude:compaction",
     "started_by": "claude:compaction",
     "continuations": [],
-    "completed_at": 1794658388.6563146
+    "impact_assessment": {
+      "why": "the AegeanWorks live watchdog can only guess whether the embedded studio actually started; a first-frame handshake gives it a definitive signal",
+      "benefits": "the live page can distinguish real starts from broken scripts once it opts into the handshake",
+      "risks": "contract: byte-parity between web.py and sealed src/orrery.js; dependency: none; concurrency: none; state: none",
+      "mitigation": "failing-first smoke assertion, 157-test suite, ruff"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'reforge:run-1' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794644765.337871,
-      "timestamp_str": "2026-11-14 11:26:05",
-      "agent": "vibe:orrery-review"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 19",
@@ -287,6 +282,24 @@
         ],
         "forced": false
       }
+    },
+    {
+      "task_id": "orrery-boot-handshake",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Announce studio boot on the first painted frame (body data-screen)",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794668359.3067365,
+      "timestamp_str": "2026-11-14 17:59:19",
+      "agent": "claude:compaction",
+      "impact_assessment": {
+        "why": "the AegeanWorks live watchdog can only guess whether the embedded studio actually started; a first-frame handshake gives it a definitive signal",
+        "benefits": "the live page can distinguish real starts from broken scripts once it opts into the handshake",
+        "risks": "contract: byte-parity between web.py and sealed src/orrery.js; dependency: none; concurrency: none; state: none",
+        "mitigation": "failing-first smoke assertion, 157-test suite, ruff"
+      },
+      "plan_digest": "c945f7eb0c0317e72336e08a59e0c0bc612763cc2c6604222be8725a08517a02"
     }
   ]
 }

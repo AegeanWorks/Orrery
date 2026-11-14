@@ -154,6 +154,7 @@ globalThis.dispatchWindow = (name, event = {}) => {
 };
 
 globalThis.document = {
+  body: { dataset: {} },
   getElementById(id) {
     if (!elements[id]) {
       throw new Error(`the studio references a missing element id: ${id}`);
@@ -396,3 +397,9 @@ if (globalThis.ORRERY_SCENARIOS.schema !== 1) {
 }
 
 console.log("studio smoke: boot, animate, pause, step, reverse, warp, hud, camera, reset, switch, merge, upload and relativity all exercised");
+
+// The live-page watchdog handshake: body[data-screen] must appear on the
+// first painted animation frame and prove the studio actually started.
+if (!document.body || !document.body.dataset || document.body.dataset.screen !== "studio") {
+  fail("boot: the live-page handshake (body data-screen) never fired");
+}

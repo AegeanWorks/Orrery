@@ -1347,6 +1347,12 @@ function bootStudio(document_) {
 
     // Update HUD metrics every 4 frames
     frameCount++;
+    if (frameCount === 1) {
+      // Live-page boot handshake: the first painted animation frame proves
+      // the studio actually started (the AegeanWorks watchdog reads
+      // body[data-screen] instead of guessing from the title).
+      document_.body.dataset.screen = "studio";
+    }
     if (frameCount % 4 === 0) {
       const world = state.world;
       el["time-readout"].textContent =

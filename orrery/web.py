@@ -1353,6 +1353,11 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
 
     // Update HUD Metrics every 4 frames
     frameCount++;
+    if (frameCount === 1) {
+      // Live-page boot handshake: the first painted frame proves the studio
+      // actually started (the AegeanWorks watchdog reads body[data-screen]).
+      document.body.dataset.screen = 'studio';
+    }
     if (frameCount % 4 === 0) {
       document.getElementById('time-readout').textContent = `t = ${state.time.toFixed(2)} ${state.units.time}`;
       const ke = kineticEnergy();
