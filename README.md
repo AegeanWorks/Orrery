@@ -312,6 +312,9 @@ understood parameters are `world` (scenario key), `dt`, `rate` (warp, capped at 
 `reverse=1`, `relativity=0` (force the classical model off), `c` (implies relativity),
 `ke` (implies the Coulomb checkbox), and `collision` (`off`, `bounce` or `merge`).
 They re-apply on every world switch, exactly like the served studio's `applyWebOptions`.
+The studio also mirrors its state back into the query string (`history.replaceState`), so
+after any world switch, warp bump, reverse toggle or physics change the address bar always
+holds a link that restores the current view; copying it shares the exact configuration.
 Inside the page, Space toggles play/pause and R resets the world; the keys are ignored
 while a slider or selector holds focus.
 

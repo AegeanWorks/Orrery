@@ -812,6 +812,10 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
     layoutObserver.observe(energyCanvas);
   } else {
     document.getElementById('btn-toggle-hud').addEventListener('click', () => setTimeout(resize, 0));
+    // The HUD collapse animates over 0.2s, so the one-shot timeout refits
+    // only the start of the transition; transitionend covers the finish.
+    const hudPanel = document.getElementById('hud-panel');
+    if (hudPanel) hudPanel.addEventListener('transitionend', resize);
   }
   resize();
 

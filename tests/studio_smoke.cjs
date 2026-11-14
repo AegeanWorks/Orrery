@@ -187,7 +187,8 @@ globalThis.document = {
 
 // Load the same generated data and the studio, which boots against the stub.
 (0, eval)(fs.readFileSync(path.join(__dirname, "..", "data", "scenarios.js"), "utf8"));
-(0, eval)(fs.readFileSync(path.join(__dirname, "..", "src", "orrery.js"), "utf8"));
+const orrerySource = fs.readFileSync(path.join(__dirname, "..", "src", "orrery.js"), "utf8");
+(0, eval)(orrerySource);
 
 
 // HUD collapse changes the canvas layout box without a window resize; the
@@ -343,7 +344,7 @@ if (elements["scenario-select"].children.length !== 10) {
 
 // The query string carries the same deep-link knobs as the local studio's
 // /api/config: rate, reverse, c and ke apply on every scenario load.
-globalThis.location = { search: "?rate=4&reverse=1&c=15&ke=0.5&collision=merge" };
+globalThis.location = { search: "?rate=4&reverse=1&c=15&ke=0.5&collision=merge&dt=0.004" };
 elements["scenario-select"].value = "binary";
 elements["scenario-select"].dispatch("change");
 if (elements["warp-label"].textContent !== "4x") {
@@ -357,6 +358,38 @@ if (!elements["check-relativity"].checked || elements["label-c"].textContent !==
 }
 if (!elements["check-coulomb"].checked || elements["label-ke"].textContent !== "ke=0.5") {
   fail(`url options: the ke override did not apply (${elements["label-ke"].textContent})`);
+}
+if (elements["label-dt"].textContent !== "0.004") {
+  fail(`url options: the dt override did not apply (${elements["label-dt"].textContent})`);
+}
+
+// ?relativity=0 must clear the checkbox the scenario set.
+globalThis.location = { search: "?relativity=0" };
+elements["scenario-select"].dispatch("change");
+if (elements["check-relativity"].checked) {
+  fail("url options: ?relativity=0 did not clear the relativity checkbox");
+}
+globalThis.location = { search: "?rate=4&reverse=1&c=15&ke=0.5&collision=merge" };
+elements["scenario-select"].dispatch("change");
+
+// The URL must mirror the studio state (write-back), so a refresh or a
+// copied link keeps the same view.
+let lastUrl = null;
+globalThis.history = {
+  replaceState(state_, title_, url) {
+    lastUrl = url;
+  },
+};
+elements["btn-warp-up"].dispatch("click");
+if (!lastUrl || lastUrl.indexOf("rate=6") === -1) {
+  fail(`url write-back: the warp bump never reached the URL (${lastUrl})`);
+}
+if (lastUrl.indexOf("world=binary") === -1 || lastUrl.indexOf("collision=merge") === -1) {
+  fail(`url write-back: the URL lost the world or collision state (${lastUrl})`);
+}
+elements["btn-reverse"].dispatch("click");
+if (!lastUrl || lastUrl.indexOf("reverse=1") !== -1) {
+  fail(`url write-back: toggling forward must drop reverse from the URL (${lastUrl})`);
 }
 if (elements["select-collision"].value !== "merge") {
   fail(`url options: the collision override did not apply (${elements["select-collision"].value})`);
@@ -428,4 +461,16 @@ console.log("studio smoke: boot, animate, pause, step, reverse, warp, hud, camer
 // first painted animation frame and prove the studio actually started.
 if (!document.body || !document.body.dataset || document.body.dataset.screen !== "studio") {
   fail("boot: the live-page handshake (body data-screen) never fired");
+}
+
+// A fresh boot must honor ?world= (the query string picks the initial
+// scenario; the served page instead takes it from /api/config).
+globalThis.location = { search: "?world=figure-eight&dt=0.03" };
+new Function(orrerySource)();
+pump(2);
+if (elements["scenario-select"].value !== "figure-eight") {
+  fail(`url options: ?world did not select the initial scenario (${elements["scenario-select"].value})`);
+}
+if (elements["label-dt"].textContent !== "0.03") {
+  fail(`url options: ?dt did not apply at boot (${elements["label-dt"].textContent})`);
 }
