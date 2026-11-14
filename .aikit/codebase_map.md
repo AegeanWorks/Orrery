@@ -10,7 +10,7 @@
 - **Total Classes**: `34`
 - **Total Top-Level Functions**: `90`
 - **Total Class Methods**: `225`
-- **Total Source Lines**: `6770`
+- **Total Source Lines**: `6775`
 
 ## 🧭 Map Coverage
 - **Indexed**: python (`23` module(s))
@@ -229,7 +229,7 @@
 ### [`orrery/web.py`](orrery/web.py)
 > *Zero-dependency HTTP server and embedded interactive Web-based UI for Orrery.*
 
-**Size**: `1420` lines (`51267` bytes)
+**Size**: `1425` lines (`51503` bytes)
 
 **Classes:**
 - `class WebOptions` - *Physics and time overrides shared by the browser and the terminal.*
