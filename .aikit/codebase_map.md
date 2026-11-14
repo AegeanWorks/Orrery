@@ -9,8 +9,8 @@
 - **Total Python Modules**: `23`
 - **Total Classes**: `34`
 - **Total Top-Level Functions**: `90`
-- **Total Class Methods**: `224`
-- **Total Source Lines**: `6749`
+- **Total Class Methods**: `225`
+- **Total Source Lines**: `6770`
 
 ## 🧭 Map Coverage
 - **Indexed**: python (`23` module(s))
@@ -229,7 +229,7 @@
 ### [`orrery/web.py`](orrery/web.py)
 > *Zero-dependency HTTP server and embedded interactive Web-based UI for Orrery.*
 
-**Size**: `1408` lines (`50712` bytes)
+**Size**: `1420` lines (`51267` bytes)
 
 **Classes:**
 - `class WebOptions` - *Physics and time overrides shared by the browser and the terminal.*
@@ -524,7 +524,7 @@
 ---
 
 ### [`tests/test_web.py`](tests/test_web.py)
-**Size**: `323` lines (`12909` bytes)
+**Size**: `332` lines (`13331` bytes)
 
 **Classes:**
 - `class WebApiTests`
@@ -553,6 +553,7 @@
   - Method `.test_json_safe_replaces_non_finite_floats()`
   - Method `.test_run_server_wires_initial_scenario_and_options()`
   - Method `.test_browser_matches_terminal_relativity_and_trails()`
+  - Method `.test_browser_keyboard_shortcuts()`
   - Method `.test_oversized_upload_is_refused()`
 
 ---
