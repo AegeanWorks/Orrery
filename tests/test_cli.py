@@ -360,6 +360,29 @@ class InteractiveAndTelemetryTests(unittest.TestCase):
                     self.assertEqual(code, 0)
                     self.assertIn("Stopped at t =", output)
 
+    def test_export_relativity_without_light_speed_is_rejected(self):
+        payload = {
+            "key": "no-light",
+            "g": 1.0, "dt": 0.01, "span": 4.0, "extent": [2.0, 2.0],
+            "bodies": [
+                {"name": "A", "mass": 1.0, "position": [0.0, 0.0],
+                 "velocity": [0.0, 0.0], "symbol": "A"},
+                {"name": "B", "mass": 1.0, "position": [1.0, 0.0],
+                 "velocity": [0.0, 1.0], "symbol": "B"},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "world.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            target = Path(folder) / "rel.json"
+            code, output = run_cli("export", str(path), "--out", str(target),
+                                   "--until", "2", "--every", "1", "--format", "json",
+                                   "--relativity")
+            self.assertEqual(code, 2)
+            self.assertIn("Error:", output)
+            self.assertIn("--c-light", output)
+            self.assertFalse(target.exists())
+
     def test_export_relativity_and_merge(self):
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder) / "rel_merge.json"

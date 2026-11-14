@@ -203,7 +203,10 @@ extent. It never executes code from the file.
 - **Collisions and relativity are opt-in.** By default bodies pass through one another under
   Newtonian gravity. `--relativity` adds the 1PN precession term, `--merge` coalesces contacts,
   `--bounce` exchanges momentum with a chosen restitution, and `--k-coulomb` adds electrostatic
-  force for charged bodies. This remains a sandbox for orbital intuition, not a mission-design
+  force for charged bodies. `--relativity` needs a speed of light: one declared by the scenario
+  or given via `--c-light` — `export` reports an error when neither exists, and relativistic
+  energy telemetry rejects superluminal speeds instead of silently treating them as Newtonian.
+  This remains a sandbox for orbital intuition, not a mission-design
   tool.
 
 ## 📦 What's Inside

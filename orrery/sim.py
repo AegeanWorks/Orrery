@@ -365,7 +365,11 @@ class World:
         total = 0.0
         for b in self.bodies:
             beta2 = b.vel.norm_sq() / c2
-            gamma = 1.0 / math.sqrt(1.0 - beta2) if beta2 < 1.0 else 1.0
+            if beta2 >= 1.0:
+                raise ValueError(
+                    f"body '{b.name}' reaches {b.vel.norm():g} with c = {self.c:g}; "
+                    "relativistic energy is undefined at or above the speed of light")
+            gamma = 1.0 / math.sqrt(1.0 - beta2)
             total += gamma * b.mass * c2
         return total
 

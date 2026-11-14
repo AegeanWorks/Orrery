@@ -1081,6 +1081,14 @@ def _cmd_export(args: argparse.Namespace) -> int:
     relativity = getattr(args, "relativity", False)
     c_override = getattr(args, "c_light", None)
     c_val = c_override if c_override is not None else (scenario.c if relativity else None)
+    if relativity and c_val is None:
+        raise CliError(
+            f"the scenario '{scenario.key}' declares no speed of light.",
+            "--relativity without a light speed would silently run Newtonian physics "
+            "and record c = null in the export metadata.",
+            "pass --c-light <value>, or pick a scenario that already declares c.",
+            code=2,
+        )
     k_coulomb = getattr(args, "k_coulomb", None)
     k_val = k_coulomb if k_coulomb is not None else scenario.k_e
     merge_radius = getattr(args, "merge_radius", 0.0) if getattr(args, "merge", False) else 0.0

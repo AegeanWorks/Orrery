@@ -9,8 +9,8 @@
 - **Total Python Modules**: `20`
 - **Total Classes**: `31`
 - **Total Top-Level Functions**: `76`
-- **Total Class Methods**: `219`
-- **Total Source Lines**: `6219`
+- **Total Class Methods**: `221`
+- **Total Source Lines**: `6261`
 
 ## 🧭 Map Coverage
 - **Indexed**: python (`20` module(s))
@@ -37,7 +37,7 @@
 ### [`orrery/cli.py`](orrery/cli.py)
 > *Command-line surface for Orrery.*
 
-**Size**: `1376` lines (`59596` bytes)
+**Size**: `1384` lines (`59990` bytes)
 
 **Classes:**
 - `class CliError` - *A failure with a cause and a concrete next action.*
@@ -165,7 +165,7 @@
 ### [`orrery/sim.py`](orrery/sim.py)
 > *Gravity, bodies and a symplectic leapfrog integrator.*
 
-**Size**: `426` lines (`17511` bytes)
+**Size**: `430` lines (`17723` bytes)
 
 **Classes:**
 - `class Vec2` - *A point or vector in the plane.*
@@ -259,7 +259,7 @@
 ---
 
 ### [`tests/test_cli.py`](tests/test_cli.py)
-**Size**: `572` lines (`26546` bytes)
+**Size**: `595` lines (`27640` bytes)
 
 **Classes:**
 - `class ListAndInfoTests`
@@ -303,6 +303,7 @@
   - Method `.test_scenario_switching_keys()`
   - Method `.test_cli_relativity_and_merge_flags()`
   - Method `.test_run_paused_single_step()`
+  - Method `.test_export_relativity_without_light_speed_is_rejected()`
   - Method `.test_export_relativity_and_merge()`
   - Method `.test_keyboard_arrow_mapping()`
   - Method `.test_compose_frame_fps_and_step_hint()`
@@ -436,7 +437,7 @@
 ---
 
 ### [`tests/test_sim.py`](tests/test_sim.py)
-**Size**: `280` lines (`13538` bytes)
+**Size**: `287` lines (`13871` bytes)
 
 **Classes:**
 - `class Vec2Tests`
@@ -458,6 +459,7 @@
   - Method `.test_coulomb_repulsion_and_attraction()`
   - Method `.test_electrostatic_energy_and_potential()`
   - Method `.test_relativistic_energy_and_schwarzschild_radius()`
+  - Method `.test_relativistic_energy_rejects_superluminal_body()`
   - Method `.test_elastic_bounce_collisions_conservation()`
   - Method `.test_time_reversible_leapfrog()`
   - Method `.test_advance_and_advance_to_backward_in_time()`

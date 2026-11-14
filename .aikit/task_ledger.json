@@ -1,58 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "reforge:run-1",
+    "task_id": "reforge-run1-remediation",
     "last_phase": "in_progress",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794644761.3128438,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794646520.0233686,
     "owner": "vibe:orrery-review",
     "started_by": "vibe:orrery-review",
     "continuations": [],
     "impact_assessment": {
-      "why": "Phase 4 gate outcome must be recorded before committing project memory (PRINCIPLE-001 R8, PRINCIPLE-011 R8)",
-      "benefits": "Delivery-ready review record with a traceable gate result",
-      "risks": "contract: none, ledger metadata only; dependency: none; concurrency: advisory-locked state file; state: ledger grows by one checkpoint",
-      "mitigation": "Atomic ledger write via the recovery tool; no code changes in this checkpoint"
-    },
-    "completed_at": 1794644765.3378685
+      "why": "Records Phase 4 verification for the findings remediation",
+      "benefits": "Clean audit trail linking both new tests to their recorded findings",
+      "risks": "contract: none beyond the planned signature semantics; dependency: none; concurrency: none; state: ledger only",
+      "mitigation": "Failing-first tests drove both fixes; full suite and gates rerun after README and memory regeneration"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "orrery-wave-audit",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Wave 0 survey: core sandbox, trails, keyboard, Lagrange, tracking, relativity, merge",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793723148.31633,
-      "timestamp_str": "2026-11-03 19:25:48",
-      "agent": "kilo:audit",
-      "impact_assessment": {
-        "why": "Audit first 10 commits for unverifiable claims and hidden defects",
-        "benefits": "Evidence-backed baseline for waves 10/20/30",
-        "risks": "contract: none yet; dependency: none; concurrency: none; state: ledger only",
-        "mitigation": "Read-only survey, no code changes in this checkpoint"
-      },
-      "plan_digest": "bcf10a95c9048f5b10c3f49758bc175f3bfef0e5daa5c1d13e8ede063a4cbb17"
-    },
-    {
-      "task_id": "orrery-wave-audit",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[2/4] Wave 10 survey: export physics, dot styles, elastic, Coulomb, time settings, web UI",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793723151.6103396,
-      "timestamp_str": "2026-11-03 19:25:51",
-      "agent": "kilo:audit",
-      "impact_assessment": {
-        "why": "Continue ordered audit of commits 10-19",
-        "benefits": "Isolate wave-10 defects with reproduction",
-        "risks": "contract: none yet; dependency: none; concurrency: none; state: ledger only",
-        "mitigation": "Quote and measure before any edit"
-      }
-    },
     {
       "task_id": "orrery-wave-audit",
       "phase": "phase 2",
@@ -263,6 +227,41 @@
       "timestamp": 1794646137.1875463,
       "timestamp_str": "2026-11-14 11:48:57",
       "agent": "unidentified"
+    },
+    {
+      "task_id": "reforge-run1-remediation",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/2] Plan findings remediation: superluminal ValueError in relativistic_energy, export CliError for relativity without c",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794646329.5998006,
+      "timestamp_str": "2026-11-14 11:52:09",
+      "agent": "vibe:orrery-review",
+      "impact_assessment": {
+        "why": "Run-1 review recorded two unremediated low findings with clear semantics; repair keeps telemetry honest",
+        "benefits": "Superluminal bodies can no longer report wrong energy; export no longer silently runs Newtonian",
+        "risks": "contract: relativistic_energy changes return behaviour for beta>=1; dependency: none; concurrency: none; state: none",
+        "mitigation": "Failing-first tests then minimal fixes; full 151-test suite and check gates before commit"
+      },
+      "plan_digest": "389c76ef401f3d31a7172f80135c187a3fb5f6904a09d0d95995ab2c25a0f334"
+    },
+    {
+      "task_id": "reforge-run1-remediation",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/2] Remediation complete: checklists: passed (Python 3.14, 153 tests, 5/5 gates); relativistic_energy raises on superluminal speed; export rejects --relativity without a light speed; README documents both",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794646520.0233686,
+      "timestamp_str": "2026-11-14 11:55:20",
+      "agent": "vibe:orrery-review",
+      "impact_assessment": {
+        "why": "Records Phase 4 verification for the findings remediation",
+        "benefits": "Clean audit trail linking both new tests to their recorded findings",
+        "risks": "contract: none beyond the planned signature semantics; dependency: none; concurrency: none; state: ledger only",
+        "mitigation": "Failing-first tests drove both fixes; full suite and gates rerun after README and memory regeneration"
+      }
     }
   ]
 }

@@ -224,6 +224,13 @@ class WorldTests(unittest.TestCase):
         # E_rel = gamma * m * c^2 = 1.25 * 10.0 * 25.0 = 312.5
         self.assertAlmostEqual(world.relativistic_energy(), 312.5, places=5)
 
+    def test_relativistic_energy_rejects_superluminal_body(self):
+        b1 = Body("B1", 10.0, Vec2(0.0, 0.0), Vec2(6.0, 0.0))
+        world = World((b1,), g=2.0, c=5.0)
+        # beta = 6.0 / 5.0 > 1, so the SR energy is undefined for this body.
+        with self.assertRaises(ValueError):
+            world.relativistic_energy()
+
     def test_elastic_bounce_collisions_conservation(self):
         b1 = Body("Left", 2.0, Vec2(-0.01, 0.0), Vec2(2.0, 0.0), "L")
         b2 = Body("Right", 2.0, Vec2(0.01, 0.0), Vec2(-2.0, 0.0), "R")
