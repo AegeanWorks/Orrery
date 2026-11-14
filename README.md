@@ -304,6 +304,15 @@ embeds the same physics engine as the terminal UI: `src/orrery.js` is a bit-exac
 holds the nine worlds dumped by `python tools/dump_scenarios.py` from the real Python scenario
 code. If a scenario ever changes, rerun that dumper (`--check` fails on a stale dump).
 
+The sealed build accepts deep links with the same knobs the server studio takes as flags:
+`index.html?world=figure-eight&rate=4&reverse=1&c=30&ke=0.25&dt=0.01&collision=merge`
+understood parameters are `world` (scenario key), `dt`, `rate` (warp, capped at 50x),
+`reverse=1`, `relativity=0` (force the classical model off), `c` (implies relativity),
+`ke` (implies the Coulomb checkbox), and `collision` (`off`, `bounce` or `merge`).
+They re-apply on every world switch, exactly like the served studio's `applyWebOptions`.
+Inside the page, Space toggles play/pause and R resets the world; the keys are ignored
+while a slider or selector holds focus.
+
 ## 📚 Design Notes
 
 The integrator, unit policy, rendering boundary, viewport fitting and work caps are recorded in

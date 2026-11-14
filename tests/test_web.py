@@ -302,6 +302,15 @@ class WebConfigTests(unittest.TestCase):
         self.assertIn("data.trail_length", HTML_PAGE)
         self.assertIn("slider-trail", HTML_PAGE)
 
+    def test_browser_keyboard_shortcuts(self):
+        from orrery.web import HTML_PAGE
+        # Tooltips promise Play/Pause (Space) and Reset (R); the keydown listener
+        # must deliver them while form controls keep their own keys.
+        self.assertIn("keydown", HTML_PAGE)
+        self.assertIn("'Space'", HTML_PAGE)
+        self.assertIn("'KeyR'", HTML_PAGE)
+        self.assertIn("preventDefault", HTML_PAGE)
+
     def test_oversized_upload_is_refused(self):
         request = urllib.request.Request(
             f"{self.base_url}/api/validate",

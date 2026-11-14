@@ -69,7 +69,11 @@ function makeElement(tag) {
     setAttribute(name, value) {
       attributes[name] = value;
     },
-    click() {},
+    click() {
+      for (const handler of listeners["click"] || []) {
+        handler({ target: element, preventDefault() {} });
+      }
+    },
     classList: {
       toggle() {},
     },
@@ -139,7 +143,15 @@ globalThis.cancelAnimationFrame = () => {
 };
 globalThis.devicePixelRatio = 1.0;
 globalThis.location = { search: "" };
-globalThis.addEventListener = () => {};
+const windowListeners = {};
+globalThis.addEventListener = (name, handler) => {
+  (windowListeners[name] = windowListeners[name] || []).push(handler);
+};
+globalThis.dispatchWindow = (name, event = {}) => {
+  for (const handler of windowListeners[name] || []) {
+    handler({ target: {}, preventDefault() {}, ...event });
+  }
+};
 
 globalThis.document = {
   getElementById(id) {
@@ -301,6 +313,48 @@ elements["file-input"].dispatch("change", { target: { files: [{}] } });
 if (elements["scenario-select"].children.length !== 10) {
   fail("upload: re-uploading the same scenario duplicated its option");
 }
+
+// The query string carries the same deep-link knobs as the local studio's
+// /api/config: rate, reverse, c and ke apply on every scenario load.
+globalThis.location = { search: "?rate=4&reverse=1&c=15&ke=0.5&collision=merge" };
+elements["scenario-select"].value = "binary";
+elements["scenario-select"].dispatch("change");
+if (elements["warp-label"].textContent !== "4x") {
+  fail(`url options: the rate override did not apply (${elements["warp-label"].textContent})`);
+}
+if (elements["btn-reverse"].textContent !== "REVERSE") {
+  fail("url options: the reverse override did not apply");
+}
+if (!elements["check-relativity"].checked || elements["label-c"].textContent !== "c=15") {
+  fail(`url options: the c override did not apply (${elements["label-c"].textContent})`);
+}
+if (!elements["check-coulomb"].checked || elements["label-ke"].textContent !== "ke=0.5") {
+  fail(`url options: the ke override did not apply (${elements["label-ke"].textContent})`);
+}
+if (elements["select-collision"].value !== "merge") {
+  fail(`url options: the collision override did not apply (${elements["select-collision"].value})`);
+}
+
+// Keyboard: Space toggles play/pause and R resets, matching the tooltips.
+const faceBeforeSpace = elements["btn-play"].textContent;
+globalThis.dispatchWindow("keydown", { code: "Space" });
+if (elements["btn-play"].textContent === faceBeforeSpace) {
+  fail(`keyboard: Space did not toggle the run (${elements["btn-play"].textContent})`);
+}
+globalThis.dispatchWindow("keydown", { code: "KeyR" });
+pump(4);
+const resetTime = Math.abs(parseFloat(elements["time-readout"].textContent.slice(4)));
+if (!(resetTime < 0.3)) {
+  fail(`keyboard: KeyR did not reset the world (t = ${resetTime})`);
+}
+if (elements["btn-play"].textContent !== "\u23F8") {
+  fail("keyboard: KeyR unpaused the run");
+}
+globalThis.dispatchWindow("keydown", { code: "Space" });
+if (elements["btn-play"].textContent !== "\u25B6") {
+  fail("keyboard: Space did not pause the run again");
+}
+globalThis.location = { search: "" };
 
 // A paused studio must stay paused across a reset and a world switch, exactly
 // like the local studio (the run is still paused from the earlier pause step).

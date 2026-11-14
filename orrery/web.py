@@ -1166,6 +1166,18 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
   document.getElementById('btn-toggle-hud').addEventListener('click', () => {
     document.getElementById('hud-panel').classList.toggle('collapsed');
   });
+  // Keyboard: Space toggles play/pause, R resets the world. Ignored while a
+  // form control holds focus so sliders and selectors keep their keys.
+  window.addEventListener('keydown', e => {
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (e.repeat || tag === 'input' || tag === 'select' || tag === 'textarea') return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      document.getElementById('btn-play').click();
+    } else if (e.code === 'KeyR') {
+      document.getElementById('btn-reset').click();
+    }
+  });
   document.getElementById('slider-dt').addEventListener('input', e => {
     state.dt = parseFloat(e.target.value);
     document.getElementById('label-dt').textContent = state.dt.toString();
