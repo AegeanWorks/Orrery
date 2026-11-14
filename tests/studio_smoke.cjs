@@ -266,6 +266,11 @@ const bodiesRows = elements["bodies-tbody"].children.length;
 if (bodiesRows < 1 || bodiesRows > 3) {
   fail(`merge: the bodies table holds ${bodiesRows} rows`);
 }
+const markerRow = elements["bodies-tbody"].children[0];
+const markerMarker = markerRow.children[0].children[0];
+if (!markerMarker || !(markerMarker.attributes.style || "").startsWith("color: #")) {
+  fail("legend: the bodies-table marker lost its per-body colour");
+}
 
 // Uploading a valid custom scenario registers it and swaps the world.
 let uploads = [];
@@ -292,6 +297,21 @@ if (elements["scenario-select"].children.length !== 10) {
 if (!uploads.some((message) => message.startsWith("Loaded custom scenario:"))) {
   fail(`upload: the success alert never fired (${uploads.join(" | ")})`);
 }
+elements["file-input"].dispatch("change", { target: { files: [{}] } });
+if (elements["scenario-select"].children.length !== 10) {
+  fail("upload: re-uploading the same scenario duplicated its option");
+}
+
+// A paused studio must stay paused across a reset and a world switch, exactly
+// like the local studio (the run is still paused from the earlier pause step).
+elements["btn-reset"].dispatch("click");
+elements["scenario-select"].value = "solar";
+elements["scenario-select"].dispatch("change");
+pump(4);
+if (elements["btn-play"].textContent !== "\u25B6") {
+  fail("switch: the studio unpaused itself where the local studio stays paused");
+}
+elements["btn-play"].dispatch("click");
 
 // Uploading invalid JSON must surface a validation error, never throw.
 uploads = [];

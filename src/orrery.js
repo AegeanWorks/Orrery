@@ -921,8 +921,6 @@ function bootStudio(document_) {
     state.scenario = scenario;
     state.dt = scenario.dt;
     state.maxTrails = scenario.trailLength || 800;
-    state.paused = false;
-    el["btn-play"].textContent = "\u23F8";
 
     setSliderValue(el["slider-trail"], state.maxTrails);
     el["label-trail"].textContent = String(state.maxTrails);
@@ -1121,10 +1119,12 @@ function bootStudio(document_) {
       const result = validateScenarioDocument(JSON.stringify(parsed));
       if (result.valid) {
         const select = el["scenario-select"];
-        const option = document_.createElement("option");
-        option.value = result.key;
-        option.textContent = `${result.title} (${result.bodies} bodies)`;
-        select.appendChild(option);
+        if (!Array.from(select.children).some((option) => option.value === result.key)) {
+          const option = document_.createElement("option");
+          option.value = result.key;
+          option.textContent = `${result.title} (${result.bodies} bodies)`;
+          select.appendChild(option);
+        }
         select.value = result.key;
         state.scenario = result.entry;
         loadScenario(result.entry);
@@ -1332,11 +1332,9 @@ function bootStudio(document_) {
       for (const body of state.world.bodies) {
         const row = document_.createElement("tr");
         const speedCell = document_.createElement("td");
-        speedCell.marker = true;
         const marker = document_.createElement("span");
         const color = COLOR_PALETTE[body.color] || "#ffffff";
-        marker.style = color;
-        marker.color = color;
+        marker.setAttribute("style", `color: ${color}`);
         marker.textContent = "\u25CF " + body.name;
         const massCell = document_.createElement("td");
         massCell.textContent = body.mass.toExponential(1);
