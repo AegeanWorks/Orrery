@@ -10,34 +10,6 @@ chosen worlds, a symplectic integrator, optional relativity and collision physic
 diagnostics, orbit trails, CSV and JSON export, and no dependencies outside the Python standard
 library.
 
-```text
-ORRERY · Figure-Eight Choreography
-──────────────────────────────────────────────────────────────────────────
-
-
-
-
-              ⣀⣀⣀⣀⣀⣀⣀⣀                              ⣀⣀⣀⣀⣀⣀⣀⣀
-         ⢀⡤⠖⠋⠉⠁      ⠈⠉⠓⠲⢤⣀                    ⣀⡤⠖⠚⠉⠁      ⠈⠉⠙⠲⢤⡀
-       ⢀⡴⠋                ⠈⠙⠦⣄              ⣠⠴⠋⠁                ⠙⢦⡀
-      ⣰B                     ⠈⠙⢦⣀        ⣀⡴⠋⠁                     ⠙⣆
-     ⢰⠃                         ⠈⠳⣄    ⣠C⠁                         ⠘⡆
-     ⡞                            ⠈⠳⣄⣠⠞⠁                            ⢳
-     ⢧                            ⢀⡴⠋⠙⢦⡀                            ⡼
-     ⠸⡄                         ⢀⡴⠋    ⠙⢦⡀                         ⢠⠇
-      ⠹⣄                     ⢀⣠⠞⠉        ⠉⠳⣄⡀                     ⣠⠏
-       ⠈⠳⣄                ⢀⣠⠖⠋              ⠙⠲⣄⡀                ⣠⠞⠁
-         ⠈⠓⠦⢄⣀⡀      ⢀⣀⡤⠴⠚⠉                    ⠉⠓⠦⢤⣀⡀      ⢀⣀⡠⠴A⠁
-              ⠉⠉⠉⠉⠉⠉⠉⠉                              ⠉⠉⠉⠉⠉⠉⠉⠉
-
-
-
-
-──────────────────────────────────────────────────────────────────────────
-t = 6.20 t    bodies = 3    ΔE/E = -4.96e-08
-A Alpha   B Beta   C Gamma
-```
-
 ## ⚡ 30-Second Cold-Start Quick Reference
 
 - **Runtime Prerequisites**: Python 3.10 or newer (standard library only; no runtime packages)
