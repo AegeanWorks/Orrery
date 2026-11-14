@@ -236,6 +236,16 @@ orrery/
 ├── run-web.cmd               <- one-click Windows launcher for the browser studio
 ├── run-web.command           <- one-click macOS launcher, delegates to run-web.sh
 ├── run-web.sh                <- one-click Linux/POSIX launcher for the browser studio
+├── index.html                <- sealed static browser build (embeddable, no server)
+├── package.json              <- semver for the live-site sync
+├── favicon.svg
+├── data/
+│   └── scenarios.js          <- generated: initial conditions dumped from the Python scenarios
+├── src/
+│   ├── orrery.js             <- bit-exact JS port of orrery/sim.py plus the canvas studio
+│   └── styles.css
+├── tools/
+│   └── dump_scenarios.py     <- regenerates data/scenarios.js through the real Python code
 ├── orrery/
 │   ├── __init__.py
 │   ├── __main__.py           <- `python -m orrery`
@@ -250,11 +260,14 @@ orrery/
 └── tests/
     ├── __init__.py
     ├── golden/               <- deterministic ASCII frames per scenario
+    ├── live_parity.cjs       <- Node harness: replays parity cases against src/orrery.js
+    ├── studio_smoke.cjs      <- Node harness: boots the studio against a DOM stub
     ├── test_cli.py
     ├── test_custom.py
     ├── test_golden.py
     ├── test_invariants.py
     ├── test_launchers.py
+    ├── test_live_parity.py   <- Python gate: engine vs JS parity on fresh cases
     ├── test_render.py
     ├── test_scenarios.py
     ├── test_sim.py
