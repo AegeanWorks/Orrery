@@ -93,28 +93,6 @@
     },
     {
       "task_id": "reforge:run-1",
-      "phase": "reforge stage 8",
-      "phase_num": 3,
-      "description": "Reforge stage 8: stage 8 host review reviewed; run active; coverage 34/34",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794643333.1339893,
-      "timestamp_str": "2026-11-14 11:02:13",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 9",
-      "phase_num": 3,
-      "description": "Reforge stage 9: stage 9 host review reviewed; run active; coverage 9/9",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794643350.4011674,
-      "timestamp_str": "2026-11-14 11:02:30",
-      "agent": "unidentified"
-    },
-    {
-      "task_id": "reforge:run-1",
       "phase": "reforge stage 10",
       "phase_num": 3,
       "description": "Reforge stage 10: stage 10 host review reviewed; run active; coverage 109/109",
@@ -263,6 +241,28 @@
       "timestamp": 1794644765.337871,
       "timestamp_str": "2026-11-14 11:26:05",
       "agent": "vibe:orrery-review"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 19",
+      "phase_num": 3,
+      "description": "Reforge stage 19: stage 19 host review partial; run completed; coverage 0/29",
+      "files_affected": [],
+      "status": "completed",
+      "timestamp": 1794646081.7628348,
+      "timestamp_str": "2026-11-14 11:48:01",
+      "agent": "unidentified"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 19",
+      "phase_num": 3,
+      "description": "Reforge stage 19: stage 19 host review reviewed; run active; coverage 29/29",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794646137.1875463,
+      "timestamp_str": "2026-11-14 11:48:57",
+      "agent": "unidentified"
     }
   ]
 }

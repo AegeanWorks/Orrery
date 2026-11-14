@@ -63,6 +63,7 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   used by golden-frame tests.
 - **Consequences**: Orbits become noticeably smoother at the same terminal size. The default output
   depends on a Braille-capable font; `--no-braille` and `--ascii` are explicit escape hatches.
+
 ### ADR-005: Non-blocking interactive keyboard control and live telemetry HUD
 - **Date**: 2026-10-24
 - **Status**: Accepted
@@ -70,9 +71,8 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   clear trails, reset or inspect real-time numerical conservation trends without stopping the
   process with Ctrl-C.
 - **Decision**: Introduce a zero-dependency, cross-platform KeyboardReader using msvcrt on
-  Windows and 	ermios/select on POSIX, active only when stdin.isatty() is True. Support Space
-  (pause/resume), +/- (speed), c (clear trails), 
- (reset world), 	 (toggle telemetry
+  Windows and termios/select on POSIX, active only when stdin.isatty() is True. Support Space
+  (pause/resume), +/- (speed), c (clear trails), r (reset world), t (toggle telemetry
   sparkline trend), and q (clean quit). Add --telemetry to display a trend sparkline and
   angular-momentum drift. Fall back to ASCII sparkline glyphs when terminal encoding cannot encode
   Unicode blocks.
