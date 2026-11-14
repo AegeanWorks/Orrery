@@ -803,6 +803,16 @@ table.bodies-table th:first-child, table.bodies-table td:first-child { text-alig
     return number;
   }
   window.addEventListener('resize', resize);
+  // Collapsing the HUD panel changes the canvas layout box without a window
+  // resize, so the backings must re-fit from a layout observer. Without one,
+  // the HUD toggle click re-fits on the next frame instead.
+  if (typeof ResizeObserver === 'function') {
+    const layoutObserver = new ResizeObserver(resize);
+    layoutObserver.observe(canvas);
+    layoutObserver.observe(energyCanvas);
+  } else {
+    document.getElementById('btn-toggle-hud').addEventListener('click', () => setTimeout(resize, 0));
+  }
   resize();
 
   // Load the server's initial world, option overrides and scenario catalogue

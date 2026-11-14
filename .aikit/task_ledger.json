@@ -1,35 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "orrery-boot-handshake",
-    "last_phase": "verification",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794668403.8745708,
+    "task_id": "orrery-hud-resize",
+    "last_phase": "planning",
+    "active_phase": 2,
+    "status": "in_progress",
+    "updated_at": 1794671770.962959,
     "owner": "claude:compaction",
     "started_by": "claude:compaction",
     "continuations": [],
-    "completed_at": 1794668404.1523824
+    "impact_assessment": {
+      "why": "collapsing the HUD changes the canvas layout box without a window resize, so the canvas stayed mis-sized until the next window resize",
+      "benefits": "the canvas fills the freed layout immediately, in both direction of the HUD toggle",
+      "risks": "contract: parity between web.py and sealed src/orrery.js; dependency: ResizeObserver guard plus HUD-click fallback; concurrency: none; state: none",
+      "mitigation": "failing-first smoke stub, HTML_PAGE test, 157-suite, ruff, headless two-way refit check"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "reforge-run1-remediation",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/2] Plan findings remediation: superluminal ValueError in relativistic_energy, export CliError for relativity without c",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794646329.5998006,
-      "timestamp_str": "2026-11-14 11:52:09",
-      "agent": "vibe:orrery-review",
-      "impact_assessment": {
-        "why": "Run-1 review recorded two unremediated low findings with clear semantics; repair keeps telemetry honest",
-        "benefits": "Superluminal bodies can no longer report wrong energy; export no longer silently runs Newtonian",
-        "risks": "contract: relativistic_energy changes return behaviour for beta>=1; dependency: none; concurrency: none; state: none",
-        "mitigation": "Failing-first tests then minimal fixes; full 151-test suite and check gates before commit"
-      },
-      "plan_digest": "389c76ef401f3d31a7172f80135c187a3fb5f6904a09d0d95995ab2c25a0f334"
-    },
     {
       "task_id": "reforge-run1-remediation",
       "phase": "in_progress",
@@ -301,6 +288,24 @@
         ],
         "forced": false
       }
+    },
+    {
+      "task_id": "orrery-hud-resize",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Re-fit the canvas backings when the HUD panel collapses",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794671770.962959,
+      "timestamp_str": "2026-11-14 18:56:10",
+      "agent": "claude:compaction",
+      "impact_assessment": {
+        "why": "collapsing the HUD changes the canvas layout box without a window resize, so the canvas stayed mis-sized until the next window resize",
+        "benefits": "the canvas fills the freed layout immediately, in both direction of the HUD toggle",
+        "risks": "contract: parity between web.py and sealed src/orrery.js; dependency: ResizeObserver guard plus HUD-click fallback; concurrency: none; state: none",
+        "mitigation": "failing-first smoke stub, HTML_PAGE test, 157-suite, ruff, headless two-way refit check"
+      },
+      "plan_digest": "5b7e1933eb96e46ca5064a733ef7d1f60f136a8dd00991605ac03b663879830a"
     }
   ]
 }

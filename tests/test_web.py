@@ -311,6 +311,14 @@ class WebConfigTests(unittest.TestCase):
         self.assertIn("'KeyR'", HTML_PAGE)
         self.assertIn("preventDefault", HTML_PAGE)
 
+    def test_browser_hud_collapse_refits_canvas(self):
+        from orrery.web import HTML_PAGE
+        # HUD collapse changes the canvas layout box without a window resize;
+        # the page must wire a ResizeObserver (with a HUD-toggle fallback).
+        self.assertIn("ResizeObserver", HTML_PAGE)
+        self.assertIn("layoutObserver", HTML_PAGE)
+        self.assertIn("btn-toggle-hud", HTML_PAGE)
+
     def test_oversized_upload_is_refused(self):
         request = urllib.request.Request(
             f"{self.base_url}/api/validate",

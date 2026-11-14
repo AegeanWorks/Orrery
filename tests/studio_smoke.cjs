@@ -153,6 +153,22 @@ globalThis.dispatchWindow = (name, event = {}) => {
   }
 };
 
+const observers = [];
+globalThis.ResizeObserver = class {
+  constructor(callback) {
+    this.callback = callback;
+    this.observed = [];
+    observers.push(this);
+  }
+  observe(target) {
+    this.observed.push(target);
+  }
+  fire() {
+    const entries = this.observed.map((target) => ({ target }));
+    this.callback(entries, this);
+  }
+};
+
 globalThis.document = {
   body: { dataset: {} },
   getElementById(id) {
@@ -172,6 +188,16 @@ globalThis.document = {
 // Load the same generated data and the studio, which boots against the stub.
 (0, eval)(fs.readFileSync(path.join(__dirname, "..", "data", "scenarios.js"), "utf8"));
 (0, eval)(fs.readFileSync(path.join(__dirname, "..", "src", "orrery.js"), "utf8"));
+
+
+// HUD collapse changes the canvas layout box without a window resize; the
+// ResizeObserver wiring must re-fit the backing stores.
+const mainCanvasBefore = elements["orrery-canvas"].width;
+elements["orrery-canvas"].clientWidth = 400;
+observers[observers.length - 1].fire();
+if (elements["orrery-canvas"].width === mainCanvasBefore) {
+  fail("hud collapse: the canvas backing store never re-fit after the observer fired");
+}
 
 function fail(message) {
   console.log(`FAIL ${message}`);

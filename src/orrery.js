@@ -1161,6 +1161,19 @@ function bootStudio(document_) {
   }
   resizeCanvases();
 
+  // Collapsing the HUD panel changes the canvas layout box without a window
+  // resize, so the backings must re-fit from a layout observer. Without one,
+  // the HUD toggle click re-fits on the next frame instead.
+  if (typeof globalThis.ResizeObserver === "function") {
+    const layoutObserver = new globalThis.ResizeObserver(resizeCanvases);
+    layoutObserver.observe(canvas);
+    layoutObserver.observe(energyCanvas);
+  } else {
+    el["btn-toggle-hud"].addEventListener("click", () => {
+      globalThis.setTimeout(resizeCanvases, 0);
+    });
+  }
+
   // Custom scenario upload: validated in-process by the same rules the server
   // loader applies (mirrors orrery/custom.py), so the sealed build needs no
   // backend for uploads.
