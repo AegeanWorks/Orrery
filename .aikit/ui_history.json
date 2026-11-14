@@ -1,0 +1,20 @@
+[
+  {
+    "schema": 1,
+    "surface": "app",
+    "mode": "visual",
+    "visual_change": true,
+    "changed_paths": [],
+    "no_visual_reason": "",
+    "baseline_commit": "0b455247099bd65d1e1af24a84192b2d260e72f5",
+    "contract_hash": "7693583990ac52deedaa615de4c4595a5c808d3a81784da037acc2b77badd391",
+    "started_at": 1794655461.953915,
+    "finished_at": 1794655488.994747,
+    "strikes": 0,
+    "reviewer": "Mistral Vibe",
+    "allowed_removals": [],
+    "final_snapshot_digest": "",
+    "final_snapshot_entries": 0,
+    "surface_digest": "b4bda4a777aa8a32c2511e22ffe87d920baae53d6035ee35a23b6dd10f7ab4ed"
+  }
+]
